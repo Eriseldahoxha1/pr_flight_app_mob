@@ -18,7 +18,7 @@ export default function MoreScreen({ navigation }: MoreScreenProps) {
   const theme = useAppTheme()
 
   return (
-    <ScrollView style={{ backgroundColor: theme.colors.surface }} contentContainerStyle={styles.container}>
+    <ScrollView style={{ backgroundColor: theme.colors.background }} contentContainerStyle={styles.container}>
       {menuItems.map((item, index) => (
         <Pressable
           key={item.route}
@@ -27,7 +27,7 @@ export default function MoreScreen({ navigation }: MoreScreenProps) {
           style={({ pressed }) => [
             styles.row,
             {
-              backgroundColor: pressed ? theme.colors.surfaceMuted : theme.colors.surface,
+              backgroundColor: pressed ? theme.colors.surfaceMuted : theme.colors.background,
               borderBottomColor: theme.colors.border,
               borderBottomWidth: index < menuItems.length - 1 ? sizes.borderWidth : 0,
             },

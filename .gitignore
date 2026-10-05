@@ -43,3 +43,5 @@ yarn-error.*
 # Local AI instructions
 /AGENTS.md
 /CLAUDE.md
+
+.env

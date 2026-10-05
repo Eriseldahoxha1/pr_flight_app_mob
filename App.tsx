@@ -1,20 +1,23 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StatusBar } from 'expo-status-bar'
+import RootNavigator from './src/navigator/RootNavigator'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
+import { NavigationContainer } from '@react-navigation/native'
+import RootLayout from './src/components/layouts/RootLayout'
+import { Provider } from 'react-redux'
+import { store } from './src/store'
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Flight App</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
+    <Provider store={store}>
+      <SafeAreaProvider>
+        <RootLayout>
+          <NavigationContainer>
+            <RootNavigator />
+          </NavigationContainer>
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+          <StatusBar style="auto" />
+        </RootLayout>
+      </SafeAreaProvider>
+    </Provider>
+  )
+}

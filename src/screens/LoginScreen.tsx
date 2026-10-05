@@ -19,10 +19,15 @@ import { useAppDispatch } from '../store/hooks'
 import { setSession } from '../store/authSlice'
 import { setItemAsync } from 'expo-secure-store'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useAppTheme } from '../hooks/useAppTheme'
+import { AppTheme } from '../theme/themes'
+import { radii, sizes, spacing, typography } from '../theme/tokens'
 
 const LoginScreen = () => {
   const dispatch = useAppDispatch()
   const insets = useSafeAreaInsets()
+  const theme = useAppTheme()
+  const styles = createStyles(theme)
 
   const [email, setEmail] = useState<string>('')
   const [password, setPassword] = useState<string>('')
@@ -78,7 +83,7 @@ const LoginScreen = () => {
               accessible={false}
             />
           </View>
-          <View style={[styles.form, { paddingBottom: insets.bottom + 32 }]}>
+          <View style={[styles.form, { paddingBottom: insets.bottom + spacing.xxl }]}>
             <Text style={styles.title}>Welcome aboard</Text>
             <Text style={styles.subtitle}>Log in to manage your next journey.</Text>
 
@@ -88,7 +93,7 @@ const LoginScreen = () => {
               value={email}
               onChangeText={setEmail}
               placeholder="you@example.com"
-              placeholderTextColor="#8A93A6"
+              placeholderTextColor={theme.colors.placeholder}
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
@@ -103,7 +108,7 @@ const LoginScreen = () => {
               value={password}
               onChangeText={setPassword}
               placeholder="Enter your password"
-              placeholderTextColor="#8A93A6"
+              placeholderTextColor={theme.colors.placeholder}
               secureTextEntry
               autoCapitalize="none"
               autoCorrect={false}
@@ -123,7 +128,7 @@ const LoginScreen = () => {
                 isLoading && styles.buttonDisabled,
               ]}
             >
-              {isLoading && <ActivityIndicator size="small" color="#05164D" />}
+              {isLoading && <ActivityIndicator size="small" color={theme.colors.onPrimary} />}
               <Text style={styles.buttonText}>{isLoading ? 'Logging in…' : 'Log in'}</Text>
             </Pressable>
           </View>
@@ -135,96 +140,91 @@ const LoginScreen = () => {
 
 export default LoginScreen
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F4F7FB',
-  },
+const createStyles = (theme: AppTheme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
 
-  keyboardContainer: {
-    flex: 1,
-  },
-  hero: {
-    backgroundColor: '#051D45',
-  },
+    keyboardContainer: {
+      flex: 1,
+    },
+    hero: {
+      backgroundColor: theme.colors.header,
+    },
 
-  airplane: {
-    width: '100%',
-    height: undefined,
-    aspectRatio: 1619 / 971,
-  },
-  scrollContent: {
-    flexGrow: 1,
-  },
-  form: {
-    flexGrow: 1,
-    marginTop: -20,
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    paddingHorizontal: 24,
-    paddingTop: 28,
-  },
+    airplane: {
+      width: '100%',
+      height: undefined,
+      aspectRatio: 1619 / 971,
+    },
+    scrollContent: {
+      flexGrow: 1,
+    },
+    form: {
+      flexGrow: 1,
+      marginTop: -20,
+      backgroundColor: theme.colors.surface,
+      borderTopLeftRadius: radii.panel,
+      borderTopRightRadius: radii.panel,
+      paddingHorizontal: spacing.xl,
+      paddingTop: spacing.xl,
+    },
 
-  title: {
-    fontSize: 32,
-    fontWeight: '700',
-    lineHeight: 40,
-    letterSpacing: -0.8,
-    color: '#05164D',
-    marginBottom: 8,
-  },
+    title: {
+      ...typography.heading,
+      color: theme.colors.text,
+      marginBottom: spacing.sm,
+    },
 
-  subtitle: {
-    fontSize: 16,
-    lineHeight: 24,
-    color: '#596174',
-    marginBottom: 32,
-  },
+    subtitle: {
+      ...typography.body,
+      color: theme.colors.textMuted,
+      marginBottom: spacing.xxl,
+    },
 
-  label: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#05164D',
-    marginBottom: 8,
-  },
+    label: {
+      ...typography.label,
+      color: theme.colors.text,
+      marginBottom: spacing.sm,
+    },
 
-  input: {
-    minHeight: 56,
-    borderWidth: 1,
-    borderColor: '#A5AEC0',
-    borderRadius: 10,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: '#05164D',
-    marginBottom: 24,
-  },
-  button: {
-    minHeight: 56,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    backgroundColor: '#FFB800',
-    borderRadius: 12,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    marginTop: 8,
-  },
+    input: {
+      ...typography.body,
+      minHeight: sizes.inputMinHeight,
+      borderWidth: sizes.borderWidth,
+      borderColor: theme.colors.inputBorder,
+      borderRadius: radii.md,
+      backgroundColor: theme.colors.surface,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.md,
+      color: theme.colors.text,
+      marginBottom: spacing.xl,
+    },
+    button: {
+      minHeight: sizes.buttonMinHeight,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: spacing.sm,
+      backgroundColor: theme.colors.primary,
+      borderRadius: radii.md,
+      paddingHorizontal: spacing.xl,
+      paddingVertical: spacing.lg,
+      marginTop: spacing.sm,
+    },
 
-  buttonPressed: {
-    backgroundColor: '#E5A600',
-  },
+    buttonPressed: {
+      backgroundColor: theme.colors.primaryPressed,
+    },
 
-  buttonDisabled: {
-    opacity: 0.65,
-  },
+    buttonDisabled: {
+      opacity: 0.65,
+    },
 
-  buttonText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#05164D',
-  },
-})
+    buttonText: {
+      ...typography.button,
+      color: theme.colors.onPrimary,
+    },
+  })

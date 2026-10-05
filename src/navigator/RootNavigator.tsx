@@ -25,7 +25,6 @@ export default function RootNavigator() {
         if (cancelled) return
 
         if (!savedSession) {
-          // Discard sessions saved using the previous two-key format.
           await Promise.all([deleteItemAsync('accessToken'), deleteItemAsync('userId')])
           return
         }

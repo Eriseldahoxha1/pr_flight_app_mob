@@ -1,22 +1,47 @@
 import { StatusBar } from 'expo-status-bar'
-import RootNavigator from './src/navigator/RootNavigator'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
-import { NavigationContainer } from '@react-navigation/native'
-import RootLayout from './src/components/layouts/RootLayout'
+import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native'
 import { Provider } from 'react-redux'
+import RootNavigator from './src/navigator/RootNavigator'
+import RootLayout from './src/components/layouts/RootLayout'
 import { store } from './src/store'
+import { useAppTheme } from './src/hooks/useAppTheme'
+import { useAppSelector } from './src/store/hooks'
+
+function AppContent() {
+  const theme = useAppTheme()
+  const { isInitialized, isAuthenticated } = useAppSelector(state => state.auth)
+  const showLogin = isInitialized && !isAuthenticated
+  const baseTheme = theme.dark ? DarkTheme : DefaultTheme
+
+  const navigationTheme = {
+    ...baseTheme,
+    colors: {
+      ...baseTheme.colors,
+      primary: theme.colors.tabActive,
+      background: theme.colors.background,
+      card: theme.colors.surface,
+      text: theme.colors.text,
+      border: theme.colors.border,
+      notification: theme.colors.error,
+    },
+  }
+
+  return (
+    <RootLayout>
+      <NavigationContainer theme={navigationTheme}>
+        <RootNavigator />
+      </NavigationContainer>
+      <StatusBar style={showLogin || theme.dark ? 'light' : 'dark'} />
+    </RootLayout>
+  )
+}
 
 export default function App() {
   return (
     <Provider store={store}>
       <SafeAreaProvider>
-        <RootLayout>
-          <NavigationContainer>
-            <RootNavigator />
-          </NavigationContainer>
-
-          <StatusBar style="auto" />
-        </RootLayout>
+        <AppContent />
       </SafeAreaProvider>
     </Provider>
   )

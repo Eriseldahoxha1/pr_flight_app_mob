@@ -4,12 +4,14 @@ import { useNavigation } from '@react-navigation/native'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { useAppSelector } from '../store/hooks'
 import type { RootStackParamList } from '../types/navigation'
+import { useAppTheme } from '../hooks/useAppTheme'
 
 type PublicGuardProps = {
   children: ReactNode
 }
 
 export function PublicGuard({ children }: PublicGuardProps) {
+  const theme = useAppTheme()
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
 
   const { isAuthenticated, isInitialized } = useAppSelector(state => state.auth)
@@ -25,8 +27,8 @@ export function PublicGuard({ children }: PublicGuardProps) {
 
   if (!isInitialized) {
     return (
-      <View style={styles.loading}>
-        <ActivityIndicator size="large" />
+      <View style={[styles.loading, { backgroundColor: theme.colors.background }]}>
+        <ActivityIndicator size="large" color={theme.colors.text} />
       </View>
     )
   }

@@ -1,5 +1,4 @@
 import { PrivateGuard } from '../guards/PrivateGuard'
-import HomeScreen from '../screens/HomeScreen'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { useAppTheme } from '../hooks/useAppTheme'
 import { typography } from '../theme/tokens'
@@ -7,6 +6,7 @@ import FavoriteFlightsScreen from '../screens/FavoriteFlightsScreen'
 import ProfileScreen from '../screens/ProfileScreen'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import MoreNavigator from './MoreNavigator'
+import HomeNavigator from './HomeNavigator'
 
 const tabIcons = {
   Home: { active: 'home', inactive: 'home-outline' },
@@ -49,7 +49,7 @@ export default function MainNavigator() {
           ),
         })}
       >
-        <Tab.Screen name="Home" component={HomeScreen} />
+        <Tab.Screen name="Home" component={HomeNavigator} options={{ headerShown: false }} />
         <Tab.Screen name="FavoriteFlights" component={FavoriteFlightsScreen} options={{ title: 'Favorite Flights' }} />
         <Tab.Screen name="Profile" component={ProfileScreen} />
         <Tab.Screen name="More" component={MoreNavigator} options={{ headerShown: false }} />

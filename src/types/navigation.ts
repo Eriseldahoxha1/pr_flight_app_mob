@@ -10,3 +10,7 @@ export type MoreStackParamList = {
   About: undefined
   Contact: undefined
 }
+
+export type HomeStackParamList = {
+  Dashboard: undefined
+}

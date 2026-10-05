@@ -1,7 +1,7 @@
 export type Airport = {
-  id: string;
-  name: string;
-  code: string;
-  city: string;
-  country: string;
-};
+  id: string
+  name: string
+  code: string
+  city: string
+  country: string
+}

@@ -1,12 +1,353 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View, Pressable } from 'react-native'
 import { useAppTheme } from '../hooks/useAppTheme'
-import { spacing, typography } from '../theme/tokens'
+import { radii, sizes, spacing, typography } from '../theme/tokens'
+import { useEffect, useRef, useState } from 'react'
+import AirportService from '../services/AirportService'
+import type { Airport } from '../types/airport'
+import Ionicons from '@expo/vector-icons/Ionicons'
+import AirportPicker from '../components/AirportPicker'
+import DatePicker from '../components/DatePicker'
+import { validateAirports } from '../utils/validateAirports'
+import { validateFlightDates } from '../utils/validateFlightDates'
+import RecentSearches from '../components/RecentSearches'
+import type { RecentSearch } from '../types/flight'
+import { useAppDispatch, useAppSelector } from '../store/hooks'
+import { loadRecentSearches, saveRecentSearch } from '../store/recentSearchesSlice'
+import Toast from 'react-native-toast-message'
+import { formatDate } from '../utils/formatDate'
 
 export default function HomeScreen() {
   const theme = useAppTheme()
+  const dispatch = useAppDispatch()
+  const userId = useAppSelector(state => state.auth.user?.id)
+  const history = useAppSelector(state => state.recentSearches)
+  const isSavingSearch = Boolean(history.saveRequestId)
+  const [isRefilling, setIsRefilling] = useState(false)
+  const isActive = useRef(false)
+
+  useEffect(() => {
+    isActive.current = true
+    const request = userId ? dispatch(loadRecentSearches()) : null
+    return () => {
+      isActive.current = false
+      request?.abort()
+    }
+  }, [dispatch, userId])
+
+  const [airports, setAirports] = useState<Airport[]>([])
+  const [isLoadingAirports, setIsLoadingAirports] = useState<boolean>(false)
+  const [airportsError, setAirportsError] = useState<string | null>(null)
+  const [activeAirportField, setActiveAirportField] = useState<'origin' | 'destination' | null>(null)
+  const [origin, setOrigin] = useState<Airport | null>(null)
+  const [destination, setDestination] = useState<Airport | null>(null)
+  const [departureDate, setDepartureDate] = useState<string | null>(null)
+  const [arrivalDate, setArrivalDate] = useState<string | null>(null)
+  const [activeDateField, setActiveDateField] = useState<'departure' | 'arrival' | null>(null)
+  const [hasSubmitted, setHasSubmitted] = useState(false)
+
+  const loadAirports = async () => {
+    if (isLoadingAirports || airports.length) return
+
+    setIsLoadingAirports(true)
+    setAirportsError(null)
+
+    try {
+      const airports = await AirportService.getAirports()
+      setAirports(airports)
+    } catch {
+      setAirportsError('Could not load airports. Please try again.')
+    } finally {
+      setIsLoadingAirports(false)
+    }
+  }
+
+  const openAirportPicker = (field: 'origin' | 'destination') => {
+    setActiveAirportField(field)
+    loadAirports()
+  }
+
+  const selectAirport = (airport: Airport) => {
+    if (activeAirportField === 'origin') {
+      setOrigin(airport)
+    } else if (activeAirportField === 'destination') {
+      setDestination(airport)
+    }
+  }
+
+  const openDatePicker = (field: 'departure' | 'arrival') => {
+    setActiveDateField(field)
+  }
+
+  const confirmDate = (date: string) => {
+    if (activeDateField === 'departure') {
+      setDepartureDate(date)
+      if (arrivalDate && arrivalDate < date) {
+        setArrivalDate(null)
+      }
+    } else if (activeDateField === 'arrival') {
+      setArrivalDate(date)
+    }
+  }
+
+  const airportFields = [
+    { field: 'origin', label: 'Origin', airport: origin },
+    { field: 'destination', label: 'Destination', airport: destination },
+  ] as const
+
+  const dateFields = [
+    { field: 'departure', label: 'Departure Date', date: departureDate },
+    {
+      field: 'arrival',
+      label: 'Arrival Date',
+      date: arrivalDate,
+    },
+  ] as const
+
+  const airportErrors = validateAirports(origin?.code, destination?.code)
+  const areAirportsValid = !airportErrors.origin && !airportErrors.destination && !airportErrors.route
+
+  const dateErrors = validateFlightDates(departureDate, arrivalDate)
+  const areDatesValid = !dateErrors.departure && !dateErrors.arrival && !dateErrors.range
+  const handleSearch = () => {
+    setHasSubmitted(true)
+    if (
+      !areAirportsValid ||
+      !areDatesValid ||
+      !origin ||
+      !destination ||
+      !departureDate ||
+      !arrivalDate ||
+      isSavingSearch
+    )
+      return
+
+    dispatch(
+      saveRecentSearch({
+        originCode: origin.code,
+        destinationCode: destination.code,
+        departureDate,
+        arrivalDate,
+      }),
+    )
+
+    // TODO: Navigate once Search Results is implemented.
+  }
+
+  const handleRecentSearch = async (search: RecentSearch) => {
+    if (isRefilling) return
+    setIsRefilling(true)
+    try {
+      const availableAirports = airports.length ? airports : await AirportService.getAirports()
+      if (!isActive.current) return
+      const savedOrigin = availableAirports.find(airport => airport.code === search.originCode)
+      const savedDestination = availableAirports.find(airport => airport.code === search.destinationCode)
+      if (!savedOrigin || !savedDestination) {
+        throw new Error('Airport unavailable')
+      }
+      setAirports(availableAirports)
+      setOrigin(savedOrigin)
+      setDestination(savedDestination)
+      setDepartureDate(search.departureDate)
+      setArrivalDate(search.arrivalDate)
+      setHasSubmitted(false)
+      setAirportsError('')
+    } catch {
+      if (isActive.current) {
+        Toast.show({
+          type: 'error',
+          text1: 'Could not restore this search',
+          text2: 'Check your connection and airport availability, then try again.',
+        })
+      }
+    } finally {
+      if (isActive.current) setIsRefilling(false)
+    }
+  }
+
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <Text style={[typography.title, { color: theme.colors.text }]}>Home</Text>
+      <ScrollView contentContainerStyle={styles.content}>
+        <View pointerEvents={isRefilling ? 'none' : 'auto'}>
+          {airportFields.map(({ field, label, airport }) => {
+            const fieldError = hasSubmitted ? airportErrors[field] : null
+            const isInvalid = Boolean(fieldError || airportErrors.route)
+            const errorMessage = fieldError ?? (field === 'destination' ? airportErrors.route : null)
+
+            return (
+              <View key={field} style={styles.field}>
+                <Text style={[typography.label, { color: theme.colors.text }]}>{label}</Text>
+
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`${label}: ${airport ? `${airport.code}, ${airport.city}` : 'Choose airport'}`}
+                  onPress={() => openAirportPicker(field)}
+                  style={({ pressed }) => [
+                    styles.airportInput,
+                    {
+                      borderColor: isInvalid ? theme.colors.error : theme.colors.inputBorder,
+                      backgroundColor: pressed ? theme.colors.surfaceMuted : theme.colors.surface,
+                    },
+                  ]}
+                >
+                  <Ionicons name="airplane-outline" size={sizes.icon} color={theme.colors.text} accessible={false} />
+
+                  <Text
+                    style={[
+                      typography.body,
+                      styles.fieldValue,
+                      {
+                        color: airport ? theme.colors.text : theme.colors.placeholder,
+                      },
+                    ]}
+                  >
+                    {airport ? `${airport.code} · ${airport.city}` : 'Choose airport'}
+                  </Text>
+
+                  <Ionicons
+                    name="chevron-down"
+                    size={sizes.iconSmall}
+                    color={theme.colors.textMuted}
+                    accessible={false}
+                  />
+                </Pressable>
+                {errorMessage && (
+                  <Text style={[typography.caption, { color: theme.colors.error }]}>{errorMessage}</Text>
+                )}
+              </View>
+            )
+          })}
+
+          {dateFields.map(({ field, label, date }) => {
+            const fieldError = hasSubmitted ? dateErrors[field] : null
+            const isInvalid = Boolean(fieldError || dateErrors.range)
+            const errorMessage = fieldError ?? (field === 'arrival' ? dateErrors.range : null)
+
+            return (
+              <View key={field} style={styles.field}>
+                <Text style={[typography.label, { color: theme.colors.text }]}>{label}</Text>
+
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`${label}: ${date ?? 'Choose date'}`}
+                  onPress={() => openDatePicker(field)}
+                  style={({ pressed }) => [
+                    styles.airportInput,
+                    {
+                      borderColor: isInvalid ? theme.colors.error : theme.colors.inputBorder,
+                      backgroundColor: pressed ? theme.colors.surfaceMuted : theme.colors.surface,
+                    },
+                  ]}
+                >
+                  <Ionicons name="calendar" size={sizes.icon} color={theme.colors.text} accessible={false} />
+
+                  <Text
+                    style={[
+                      typography.body,
+                      styles.fieldValue,
+                      {
+                        color: date ? theme.colors.text : theme.colors.placeholder,
+                      },
+                    ]}
+                  >
+                    {date ? formatDate(date) : 'Choose date'}
+                  </Text>
+
+                  <Ionicons
+                    name="chevron-down"
+                    size={sizes.iconSmall}
+                    color={theme.colors.textMuted}
+                    accessible={false}
+                  />
+                </Pressable>
+                {errorMessage && (
+                  <Text style={[typography.caption, { color: theme.colors.error }]}>{errorMessage}</Text>
+                )}
+              </View>
+            )
+          })}
+          <Pressable
+            accessibilityRole="button"
+            onPress={handleSearch}
+            disabled={isSavingSearch || isRefilling}
+            accessibilityState={{ disabled: isSavingSearch || isRefilling, busy: isSavingSearch }}
+            style={({ pressed }) => [
+              styles.searchButton,
+              {
+                backgroundColor: isSavingSearch
+                  ? theme.colors.disabled
+                  : pressed
+                    ? theme.colors.primaryPressed
+                    : theme.colors.primary,
+              },
+            ]}
+          >
+            <Text
+              style={[typography.button, { color: isSavingSearch ? theme.colors.onDisabled : theme.colors.onPrimary }]}
+            >
+              {isSavingSearch ? 'Saving search…' : 'Search flights'}
+            </Text>
+          </Pressable>
+        </View>
+        {history.loadRequestId ? (
+          <ActivityIndicator
+            style={styles.historyFeedback}
+            color={theme.colors.text}
+            accessibilityLabel="Loading recent searches"
+          />
+        ) : (
+          <>
+            {history.error && (
+              <View style={styles.historyFeedback}>
+                <Text style={[typography.body, { color: theme.colors.error }]}>{history.error}</Text>
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => {
+                    void dispatch(loadRecentSearches())
+                  }}
+                  style={styles.retryButton}
+                >
+                  <Text style={[typography.label, { color: theme.colors.text }]}>Reload history</Text>
+                </Pressable>
+              </View>
+            )}
+            {(!history.error || history.items.length > 0) && (
+              <View pointerEvents={isRefilling ? 'none' : 'auto'}>
+                <RecentSearches
+                  searches={history.items}
+                  onSelect={search => {
+                    void handleRecentSearch(search)
+                  }}
+                />
+              </View>
+            )}
+            {isRefilling && <ActivityIndicator color={theme.colors.text} accessibilityLabel="Restoring search" />}
+          </>
+        )}
+      </ScrollView>
+
+      <AirportPicker
+        visible={activeAirportField !== null}
+        title={activeAirportField === 'origin' ? 'Choose origin' : 'Choose destination'}
+        airports={airports}
+        selectedAirportId={activeAirportField === 'origin' ? origin?.id : destination?.id}
+        isLoading={isLoadingAirports}
+        error={airportsError}
+        onSelect={selectAirport}
+        onClose={() => setActiveAirportField(null)}
+        onRetry={() => {
+          void loadAirports()
+        }}
+      />
+
+      <DatePicker
+        key={activeDateField ?? 'closed'}
+        visible={activeDateField !== null}
+        title={activeDateField === 'departure' ? 'Choose departure date' : 'Choose arrival date'}
+        value={activeDateField === 'departure' ? departureDate : arrivalDate}
+        minDate={activeDateField === 'arrival' ? (departureDate ?? undefined) : undefined}
+        onConfirm={confirmDate}
+        onClose={() => setActiveDateField(null)}
+      />
     </View>
   )
 }
@@ -14,6 +355,42 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  content: {
     padding: spacing.xl,
+    flexGrow: 1,
+  },
+  historyFeedback: {
+    marginTop: spacing.xl,
+    gap: spacing.sm,
+  },
+  retryButton: {
+    minHeight: sizes.touchTarget,
+    justifyContent: 'center',
+  },
+  field: {
+    gap: spacing.sm,
+    marginBottom: spacing.xl,
+  },
+  airportInput: {
+    minHeight: sizes.inputMinHeight,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    borderWidth: sizes.borderWidth,
+    borderRadius: radii.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+  },
+  fieldValue: {
+    flex: 1,
+  },
+  searchButton: {
+    minHeight: sizes.buttonMinHeight,
+    borderRadius: radii.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 })

@@ -1,17 +1,13 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
-import { MoreStackParamList } from '../types/navigation'
+import { HomeStackParamList } from '../types/navigation'
+import HomeScreen from '../screens/HomeScreen'
 import { useAppTheme } from '../hooks/useAppTheme'
-import SettingsScreen from '../screens/SettingsScreen'
-import MoreScreen from '../screens/MoreScreen'
-import AboutScreen from '../screens/AboutScreen'
-import ContactScreen from '../screens/ContactScreen'
 import { typography } from '../theme/tokens'
-import { Header, getHeaderTitle } from '@react-navigation/elements'
-import HelpScreen from '../screens/HelpScreen'
+import { getHeaderTitle, Header } from '@react-navigation/elements'
 
-const Stack = createNativeStackNavigator<MoreStackParamList>()
+const Stack = createNativeStackNavigator<HomeStackParamList>()
 
-export default function MoreNavigator() {
+export default function HomeNavigator() {
   const theme = useAppTheme()
 
   return (
@@ -36,11 +32,7 @@ export default function MoreNavigator() {
         },
       }}
     >
-      <Stack.Screen name="MoreMenu" component={MoreScreen} />
-      <Stack.Screen name="Settings" component={SettingsScreen} />
-      <Stack.Screen name="Help" component={HelpScreen} />
-      <Stack.Screen name="About" component={AboutScreen} />
-      <Stack.Screen name="Contact" component={ContactScreen} />
+      <Stack.Screen name="Dashboard" component={HomeScreen} options={{ title: 'Home' }} />
     </Stack.Navigator>
   )
 }

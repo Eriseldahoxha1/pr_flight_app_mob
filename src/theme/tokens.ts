@@ -24,6 +24,7 @@ export const sizes = {
   icon: 24,
   iconSmall: 20,
   borderWidth: 1,
+  headerHeight: 64,
 } as const
 
 export const typography = {

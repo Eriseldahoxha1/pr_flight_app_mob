@@ -1,7 +1,7 @@
 import { AxiosError, AxiosResponse, create } from 'axios'
 import type { AxiosRequestConfig } from 'axios'
 import { deleteItemAsync } from 'expo-secure-store'
-import { store } from '../../store'
+import type { AppStore } from '../../store'
 import { logout } from '../../store/authSlice'
 
 const baseURL = process.env.EXPO_PUBLIC_API_URL?.trim()
@@ -13,6 +13,12 @@ const instance = create({
     'Content-Type': 'application/json',
   },
 })
+
+let store: AppStore
+
+export const connectHttpClient = (appStore: AppStore) => {
+  store = appStore
+}
 
 let invalidatingSession: Promise<void> | undefined
 

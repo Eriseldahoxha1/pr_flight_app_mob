@@ -32,6 +32,9 @@ export default function MainNavigator() {
       <Tab.Navigator
         screenOptions={({ route }) => ({
           headerShown: true,
+          headerTitleAlign: 'center',
+          headerTitleStyle: typography.subtitle,
+          headerShadowVisible: false,
           headerStyle: { backgroundColor: theme.colors.background },
           headerTintColor: theme.colors.text,
           tabBarActiveTintColor: theme.colors.tabActive,

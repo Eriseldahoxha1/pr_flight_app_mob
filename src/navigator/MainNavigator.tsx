@@ -5,8 +5,8 @@ import { useAppTheme } from '../hooks/useAppTheme'
 import { typography } from '../theme/tokens'
 import FavoriteFlightsScreen from '../screens/FavoriteFlightsScreen'
 import ProfileScreen from '../screens/ProfileScreen'
-import MoreScreen from '../screens/MoreScreen'
 import Ionicons from '@expo/vector-icons/Ionicons'
+import MoreNavigator from './MoreNavigator'
 
 const tabIcons = {
   Home: { active: 'home', inactive: 'home-outline' },
@@ -35,8 +35,8 @@ export default function MainNavigator() {
           headerTitleAlign: 'center',
           headerTitleStyle: typography.subtitle,
           headerShadowVisible: false,
-          headerStyle: { backgroundColor: theme.colors.background },
-          headerTintColor: theme.colors.text,
+          headerStyle: { backgroundColor: theme.colors.header },
+          headerTintColor: theme.colors.onHeader,
           tabBarActiveTintColor: theme.colors.tabActive,
           tabBarInactiveTintColor: theme.colors.tabInactive,
           tabBarStyle: {
@@ -52,7 +52,7 @@ export default function MainNavigator() {
         <Tab.Screen name="Home" component={HomeScreen} />
         <Tab.Screen name="FavoriteFlights" component={FavoriteFlightsScreen} options={{ title: 'Favorite Flights' }} />
         <Tab.Screen name="Profile" component={ProfileScreen} />
-        <Tab.Screen name="More" component={MoreScreen} />
+        <Tab.Screen name="More" component={MoreNavigator} options={{ headerShown: false }} />
       </Tab.Navigator>
     </PrivateGuard>
   )

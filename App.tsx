@@ -10,9 +10,9 @@ import { useAppSelector } from './src/store/hooks'
 
 function AppContent() {
   const theme = useAppTheme()
-  const { isInitialized, isAuthenticated } = useAppSelector(state => state.auth)
-  const showLogin = isInitialized && !isAuthenticated
+  const { isInitialized } = useAppSelector(state => state.auth)
   const baseTheme = theme.dark ? DarkTheme : DefaultTheme
+  const needsDarkStatusBar = !isInitialized && !theme.dark
 
   const navigationTheme = {
     ...baseTheme,
@@ -32,7 +32,7 @@ function AppContent() {
       <NavigationContainer theme={navigationTheme}>
         <RootNavigator />
       </NavigationContainer>
-      <StatusBar style={showLogin || theme.dark ? 'light' : 'dark'} />
+      <StatusBar style={needsDarkStatusBar ? 'dark' : 'light'} />
     </RootLayout>
   )
 }

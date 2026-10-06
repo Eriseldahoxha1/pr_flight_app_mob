@@ -9,6 +9,9 @@ import { useAppTheme } from '../hooks/useAppTheme'
 import { radii, sizes, spacing, typography } from '../theme/tokens'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { formatDate } from '../utils/formatDate'
+import { useAppSelector } from '../store/hooks'
+import { selectIsFavorite, selectIsFavoritePending } from '../store/favoritesSlice'
+import { useToggleFavorite } from '../hooks/useToggleFavorite'
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'FlightDetails'>
 
@@ -21,6 +24,9 @@ const statusLabels = {
 export default function FlightDetailsScreen({ route }: Props) {
   const theme = useAppTheme()
   const { flightId } = route.params
+  const isFavorite = useAppSelector(state => selectIsFavorite(state, flightId))
+  const isSavingFavorite = useAppSelector(state => selectIsFavoritePending(state, flightId))
+  const toggleFavorite = useToggleFavorite()
 
   const [flight, setFlight] = useState<Flight | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -158,6 +164,31 @@ export default function FlightDetailsScreen({ route }: Props) {
           </View>
         ))}
       </View>
+      <Pressable
+        onPress={() => toggleFavorite(flight.id, isFavorite)}
+        disabled={isSavingFavorite}
+        accessibilityRole="button"
+        accessibilityState={{ disabled: isSavingFavorite, busy: isSavingFavorite }}
+        style={({ pressed }) => [
+          styles.favoriteButton,
+          { backgroundColor: pressed ? theme.colors.primaryPressed : theme.colors.primary },
+          isSavingFavorite && styles.favoriteButtonDisabled,
+        ]}
+      >
+        {isSavingFavorite ? (
+          <ActivityIndicator size="small" color={theme.colors.onPrimary} />
+        ) : (
+          <Ionicons
+            name={isFavorite ? 'heart' : 'heart-outline'}
+            size={sizes.icon}
+            color={theme.colors.onPrimary}
+            accessible={false}
+          />
+        )}
+        <Text style={[typography.button, { color: theme.colors.onPrimary }]}>
+          {isFavorite ? 'Remove from favorites' : 'Save to favorites'}
+        </Text>
+      </Pressable>
     </ScrollView>
   )
 }
@@ -218,5 +249,17 @@ const styles = StyleSheet.create({
   infoValue: {
     flex: 1,
     textAlign: 'right',
+  },
+  favoriteButton: {
+    minHeight: sizes.buttonMinHeight,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    borderRadius: radii.md,
+    paddingHorizontal: spacing.xl,
+  },
+  favoriteButtonDisabled: {
+    opacity: 0.6,
   },
 })

@@ -16,6 +16,11 @@ class FlightService {
   }
 
   getFlight = (id: string) => HttpClient.get<Flight>(`flights/${encodeURIComponent(id)}`)
+
+  getFlightsByIds = async (ids: string[]) => {
+    if (ids.length === 0) return []
+    return HttpClient.get<Flight[]>('flights', { id: ids })
+  }
 }
 
 export default new FlightService()

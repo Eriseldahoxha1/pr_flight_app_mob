@@ -9,11 +9,16 @@ import FlightService from '../services/FlightService'
 import type { Flight } from '../types/flight'
 import { formatDate } from '../utils/formatDate'
 import FlightCard from '../components/FlightCard'
+import { useAppSelector } from '../store/hooks'
+import { useToggleFavorite } from '../hooks/useToggleFavorite'
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'SearchResults'>
 
 export default function SearchResultsScreen({ route, navigation }: Props) {
   const theme = useAppTheme()
+  const favorites = useAppSelector(state => state.favorites.items)
+  const toggleFavorite = useToggleFavorite()
+
   const { originCode, destinationCode, departureDate, arrivalDate } = route.params
 
   const [flights, setFlights] = useState<Flight[]>([])
@@ -76,9 +81,6 @@ export default function SearchResultsScreen({ route, navigation }: Props) {
     navigation.navigate('FlightDetails', { flightId })
   }
 
-  const onToggleFavFlight = () => {
-    console.log('3')
-  }
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <Text style={[typography.title, { color: theme.colors.text }]}>
@@ -122,14 +124,17 @@ export default function SearchResultsScreen({ route, navigation }: Props) {
               </Text>
             </View>
           }
-          renderItem={({ item }) => (
-            <FlightCard
-              flight={item}
-              isFavorite={false}
-              onPress={() => onFlightCardPress(item.id)}
-              onToggleFavorite={onToggleFavFlight}
-            />
-          )}
+          renderItem={({ item }) => {
+            const isFavorite = favorites.some(favorite => favorite.flightId === item.id)
+            return (
+              <FlightCard
+                flight={item}
+                isFavorite={isFavorite}
+                onPress={() => onFlightCardPress(item.id)}
+                onToggleFavorite={() => toggleFavorite(item.id, isFavorite)}
+              />
+            )
+          }}
           ListEmptyComponent={
             <Text style={[typography.body, { color: theme.colors.textMuted }]}>
               No matching flights. Try different airports or dates

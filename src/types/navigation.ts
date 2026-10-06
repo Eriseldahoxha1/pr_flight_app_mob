@@ -18,3 +18,8 @@ export type HomeStackParamList = {
   SearchResults: FlightSearchCriteria
   FlightDetails: { flightId: string }
 }
+
+export type FavoritesStackParamList = {
+  FavoriteFlightsList: undefined
+  FlightDetails: { flightId: string }
+}

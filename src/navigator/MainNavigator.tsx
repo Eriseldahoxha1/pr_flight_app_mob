@@ -2,11 +2,14 @@ import { PrivateGuard } from '../guards/PrivateGuard'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { useAppTheme } from '../hooks/useAppTheme'
 import { typography } from '../theme/tokens'
-import FavoriteFlightsScreen from '../screens/FavoriteFlightsScreen'
 import ProfileScreen from '../screens/ProfileScreen'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import MoreNavigator from './MoreNavigator'
 import HomeNavigator from './HomeNavigator'
+import { useEffect } from 'react'
+import { useAppDispatch, useAppSelector } from '../store/hooks'
+import { loadFavorites } from '../store/favoritesSlice'
+import FavoritesNavigator from './FavoritesNavigator'
 
 const tabIcons = {
   Home: { active: 'home', inactive: 'home-outline' },
@@ -26,6 +29,13 @@ const Tab = createBottomTabNavigator<MainTabParamList>()
 
 export default function MainNavigator() {
   const theme = useAppTheme()
+  const dispatch = useAppDispatch()
+  const userId = useAppSelector(state => state.auth.user?.id)
+
+  useEffect(() => {
+    const request = userId ? dispatch(loadFavorites()) : null
+    return () => request?.abort()
+  }, [dispatch, userId])
 
   return (
     <PrivateGuard>
@@ -50,7 +60,11 @@ export default function MainNavigator() {
         })}
       >
         <Tab.Screen name="Home" component={HomeNavigator} options={{ headerShown: false }} />
-        <Tab.Screen name="FavoriteFlights" component={FavoriteFlightsScreen} options={{ title: 'Favorite Flights' }} />
+        <Tab.Screen
+          name="FavoriteFlights"
+          component={FavoritesNavigator}
+          options={{ title: 'Favorite Flights', headerShown: false }}
+        />
         <Tab.Screen name="Profile" component={ProfileScreen} />
         <Tab.Screen name="More" component={MoreNavigator} options={{ headerShown: false }} />
       </Tab.Navigator>

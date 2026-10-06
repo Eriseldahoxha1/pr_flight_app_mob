@@ -26,3 +26,10 @@ export type Flight = {
   arrivalGate: string
   status: 'on-time' | 'delayed' | 'cancelled'
 }
+
+export type Favorite = {
+  id: number
+  userId: number
+  flightId: string
+  createdAt: string
+}

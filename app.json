@@ -32,7 +32,8 @@
           "backgroundColor": "#05164D"
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-system-ui"
     ]
   }
 }

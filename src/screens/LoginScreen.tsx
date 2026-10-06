@@ -53,7 +53,6 @@ const LoginScreen = () => {
       const { accessToken, user } = await AuthService.login({ email: trimmedEmail, password })
       await setItemAsync('session', JSON.stringify({ accessToken, userId: user.id }))
       dispatch(setSession({ accessToken, user }))
-      //TODO: SHOULD NAVIGATE TO HOME SCREEN
     } catch (error) {
       console.log('Failed login:' + error)
       Toast.show({

@@ -74,7 +74,7 @@ export default function ProfileScreen() {
           </View>
         </View>
       </View>
-      <View style={[styles.card, { backgroundColor: theme.colors.background, borderColor: theme.colors.border }]}>
+      <View style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
         <View style={styles.row}>
           <Ionicons name="person-outline" size={sizes.icon} color={theme.colors.text} accessible={false} />
           <Text style={[typography.body, { color: theme.colors.text }]}>Name</Text>
@@ -120,9 +120,7 @@ export default function ProfileScreen() {
                   onPress={() => onSelectTheme(option.value)}
                   style={[styles.segment, isSelected && { backgroundColor: theme.colors.primary }]}
                 >
-                  <Text
-                    style={[typography.label, { color: isSelected ? theme.colors.onPrimary : theme.colors.text }]}
-                  >
+                  <Text style={[typography.label, { color: isSelected ? theme.colors.onPrimary : theme.colors.text }]}>
                     {option.label}
                   </Text>
                 </Pressable>
@@ -178,9 +176,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.sm,
-  },
-  centeredText: {
-    textAlign: 'center',
   },
   card: {
     borderWidth: sizes.borderWidth,

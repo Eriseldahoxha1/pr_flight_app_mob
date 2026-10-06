@@ -10,6 +10,7 @@ import { logout } from '../store/authSlice'
 import Toast from 'react-native-toast-message'
 import ThemeService from '../services/ThemeService'
 import type { ThemePreference } from '../types/theme'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 const themeOptions: { value: ThemePreference; label: string }[] = [
   { value: 'system', label: 'System' },
@@ -24,6 +25,7 @@ export default function ProfileScreen() {
   const themePreference = useAppSelector(state => state.theme.preference)
 
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const [isLogoutDialogVisible, setIsLogoutDialogVisible] = useState(false)
 
   if (!user) return null
 
@@ -41,6 +43,7 @@ export default function ProfileScreen() {
       await deleteItemAsync('session')
       dispatch(logout())
     } catch {
+      setIsLogoutDialogVisible(false)
       Toast.show({
         type: 'error',
         text1: 'Could not log out',
@@ -131,21 +134,28 @@ export default function ProfileScreen() {
 
       <Pressable
         accessibilityRole="button"
-        onPress={handleLogout}
-        disabled={isLoggingOut}
-        accessibilityState={{ disabled: isLoggingOut, busy: isLoggingOut }}
+        onPress={() => setIsLogoutDialogVisible(true)}
         style={({ pressed }) => [
           styles.logoutButton,
           {
             borderColor: theme.colors.text,
             backgroundColor: pressed ? theme.colors.surfaceMuted : theme.colors.background,
-            opacity: isLoggingOut ? 0.6 : 1,
           },
         ]}
       >
         <Ionicons name="log-out-outline" size={sizes.icon} color={theme.colors.text} accessible={false} />
-        <Text style={[typography.body, { color: theme.colors.text }]}>{isLoggingOut ? 'Logging out…' : 'Log out'}</Text>
+        <Text style={[typography.body, { color: theme.colors.text }]}>Log out</Text>
       </Pressable>
+
+      <ConfirmDialog
+        visible={isLogoutDialogVisible}
+        title="Log out?"
+        confirmLabel="Log out"
+        confirmingLabel="Logging out…"
+        isConfirming={isLoggingOut}
+        onConfirm={handleLogout}
+        onCancel={() => setIsLogoutDialogVisible(false)}
+      />
     </ScrollView>
   )
 }

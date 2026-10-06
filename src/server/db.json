@@ -125,6 +125,56 @@
       "departureGate": "B03",
       "arrivalGate": "A02",
       "status": "on-time"
+    },
+    {
+      "id": "flight-4",
+      "airline": "Lufthansa",
+      "flightNumber": "LH1460",
+      "departureAirport": {
+        "id": "FCO",
+        "name": "Rome Fiumicino",
+        "code": "FCO",
+        "city": "Rome",
+        "country": "Italy"
+      },
+      "arrivalAirport": {
+        "id": "TIA",
+        "name": "Tirana International Airport",
+        "code": "TIA",
+        "city": "Tirana",
+        "country": "Albania"
+      },
+      "departureAt": "2026-10-14T18:30:00+02:00",
+      "arrivalAt": "2026-10-14T20:20:00+02:00",
+      "aircraft": "Airbus A320",
+      "departureGate": "C08",
+      "arrivalGate": "B03",
+      "status": "on-time"
+    },
+    {
+      "id": "flight-5",
+      "airline": "Lufthansa",
+      "flightNumber": "LH1462",
+      "departureAirport": {
+        "id": "FCO",
+        "name": "Rome Fiumicino",
+        "code": "FCO",
+        "city": "Rome",
+        "country": "Italy"
+      },
+      "arrivalAirport": {
+        "id": "TIA",
+        "name": "Tirana International Airport",
+        "code": "TIA",
+        "city": "Tirana",
+        "country": "Albania"
+      },
+      "departureAt": "2026-10-15T12:15:00+02:00",
+      "arrivalAt": "2026-10-15T14:05:00+02:00",
+      "aircraft": "Airbus A320",
+      "departureGate": "C11",
+      "arrivalGate": "B05",
+      "status": "cancelled"
     }
   ],
   "recentSearches": [
@@ -132,7 +182,7 @@
       "originCode": "TIA",
       "destinationCode": "FRA",
       "departureDate": "2026-10-07",
-      "arrivalDate": "2026-10-15",
+      "returnDate": "2026-10-15",
       "userId": 1,
       "createdAt": "2026-10-05T21:56:40.288Z",
       "id": 1
@@ -141,7 +191,7 @@
       "originCode": "CIA",
       "destinationCode": "MUC",
       "departureDate": "2026-10-23",
-      "arrivalDate": "2026-10-31",
+      "returnDate": "2026-10-31",
       "userId": 1,
       "createdAt": "2026-10-05T21:56:56.771Z",
       "id": 2
@@ -150,7 +200,7 @@
       "originCode": "TIA",
       "destinationCode": "FCO",
       "departureDate": "2026-10-12",
-      "arrivalDate": "2026-10-12",
+      "returnDate": "2026-10-12",
       "userId": 2,
       "createdAt": "2026-10-06T18:50:59.375Z",
       "id": 33
@@ -159,7 +209,7 @@
       "originCode": "TIA",
       "destinationCode": "FCO",
       "departureDate": "2026-10-12",
-      "arrivalDate": "2026-10-12",
+      "returnDate": "2026-10-12",
       "userId": 2,
       "createdAt": "2026-10-06T18:59:04.241Z",
       "id": 34
@@ -168,7 +218,7 @@
       "originCode": "TIA",
       "destinationCode": "FCO",
       "departureDate": "2026-10-12",
-      "arrivalDate": "2026-10-12",
+      "returnDate": "2026-10-12",
       "userId": 2,
       "createdAt": "2026-10-06T19:14:21.677Z",
       "id": 35
@@ -177,7 +227,7 @@
       "originCode": "TIA",
       "destinationCode": "FCO",
       "departureDate": "2026-10-12",
-      "arrivalDate": "2026-10-12",
+      "returnDate": "2026-10-12",
       "userId": 2,
       "createdAt": "2026-10-06T19:54:57.867Z",
       "id": 36
@@ -186,7 +236,7 @@
       "originCode": "TIA",
       "destinationCode": "FCO",
       "departureDate": "2026-10-16",
-      "arrivalDate": "2026-10-16",
+      "returnDate": "2026-10-16",
       "userId": 2,
       "createdAt": "2026-10-06T19:58:33.238Z",
       "id": 37
@@ -195,7 +245,7 @@
       "originCode": "TIA",
       "destinationCode": "FCO",
       "departureDate": "2026-10-12",
-      "arrivalDate": "2026-10-12",
+      "returnDate": "2026-10-12",
       "userId": 2,
       "createdAt": "2026-10-06T19:58:40.940Z",
       "id": 38
@@ -204,7 +254,7 @@
       "originCode": "TIA",
       "destinationCode": "FCO",
       "departureDate": "2026-10-12",
-      "arrivalDate": "2026-10-12",
+      "returnDate": "2026-10-12",
       "userId": 2,
       "createdAt": "2026-10-06T19:58:58.491Z",
       "id": 39
@@ -213,7 +263,7 @@
       "originCode": "TIA",
       "destinationCode": "FCO",
       "departureDate": "2026-10-12",
-      "arrivalDate": "2026-10-12",
+      "returnDate": "2026-10-12",
       "userId": 2,
       "createdAt": "2026-10-06T20:17:20.061Z",
       "id": 40
@@ -222,7 +272,7 @@
       "originCode": "TIA",
       "destinationCode": "FCO",
       "departureDate": "2026-10-12",
-      "arrivalDate": "2026-10-12",
+      "returnDate": "2026-10-12",
       "userId": 2,
       "createdAt": "2026-10-06T20:27:42.315Z",
       "id": 41
@@ -231,10 +281,64 @@
       "originCode": "TIA",
       "destinationCode": "FCO",
       "departureDate": "2026-10-12",
-      "arrivalDate": "2026-10-12",
+      "returnDate": "2026-10-12",
       "userId": 2,
       "createdAt": "2026-10-06T20:27:52.861Z",
       "id": 42
+    },
+    {
+      "originCode": "TIA",
+      "destinationCode": "FCO",
+      "departureDate": "2026-10-08",
+      "returnDate": "2026-10-15",
+      "userId": 1,
+      "createdAt": "2026-10-06T20:54:09.449Z",
+      "id": 43
+    },
+    {
+      "originCode": "TIA",
+      "destinationCode": "FCO",
+      "departureDate": "2026-10-07",
+      "returnDate": null,
+      "userId": 1,
+      "createdAt": "2026-10-06T20:57:11.027Z",
+      "id": 44
+    },
+    {
+      "originCode": "TIA",
+      "destinationCode": "FCO",
+      "departureDate": "2026-10-12",
+      "returnDate": null,
+      "userId": 1,
+      "createdAt": "2026-10-06T20:57:24.125Z",
+      "id": 45
+    },
+    {
+      "originCode": "TIA",
+      "destinationCode": "FCO",
+      "departureDate": "2026-10-12",
+      "returnDate": "2026-10-15",
+      "userId": 1,
+      "createdAt": "2026-10-06T20:57:32.591Z",
+      "id": 46
+    },
+    {
+      "originCode": "TIA",
+      "destinationCode": "FCO",
+      "departureDate": "2026-10-12",
+      "returnDate": "2026-10-15",
+      "userId": 1,
+      "createdAt": "2026-10-06T20:58:20.357Z",
+      "id": 47
+    },
+    {
+      "originCode": "TIA",
+      "destinationCode": "FCO",
+      "departureDate": "2026-10-12",
+      "returnDate": "2026-10-15",
+      "userId": 1,
+      "createdAt": "2026-10-06T21:00:49.218Z",
+      "id": 48
     }
   ],
   "favorites": [
@@ -243,6 +347,18 @@
       "flightId": "flight-1",
       "createdAt": "2026-10-06T20:17:26.610Z",
       "id": 1
+    },
+    {
+      "userId": 1,
+      "flightId": "flight-5",
+      "createdAt": "2026-10-06T20:57:41.454Z",
+      "id": 2
+    },
+    {
+      "userId": 1,
+      "flightId": "flight-1",
+      "createdAt": "2026-10-06T21:00:57.784Z",
+      "id": 3
     }
   ]
 }

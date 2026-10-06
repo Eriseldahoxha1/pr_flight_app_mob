@@ -31,7 +31,9 @@ export default function RecentSearches({ searches, onSelect }: RecentSearchesPro
         </View>
       ) : (
         searches.slice(0, 10).map(search => {
-          const dates = `${formatDate(search.departureDate)} – ${formatDate(search.arrivalDate)}`
+          const dates = search.returnDate
+            ? `${formatDate(search.departureDate)} – ${formatDate(search.returnDate)}`
+            : `${formatDate(search.departureDate)} · One way`
 
           return (
             <Pressable

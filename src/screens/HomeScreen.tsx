@@ -45,8 +45,8 @@ export default function HomeScreen({ navigation }: Props) {
   const [origin, setOrigin] = useState<Airport | null>(null)
   const [destination, setDestination] = useState<Airport | null>(null)
   const [departureDate, setDepartureDate] = useState<string | null>(null)
-  const [arrivalDate, setArrivalDate] = useState<string | null>(null)
-  const [activeDateField, setActiveDateField] = useState<'departure' | 'arrival' | null>(null)
+  const [returnDate, setReturnDate] = useState<string | null>(null)
+  const [activeDateField, setActiveDateField] = useState<'departure' | 'return' | null>(null)
   const [hasSubmitted, setHasSubmitted] = useState(false)
 
   const loadAirports = async () => {
@@ -78,18 +78,18 @@ export default function HomeScreen({ navigation }: Props) {
     }
   }
 
-  const openDatePicker = (field: 'departure' | 'arrival') => {
+  const openDatePicker = (field: 'departure' | 'return') => {
     setActiveDateField(field)
   }
 
   const confirmDate = (date: string) => {
     if (activeDateField === 'departure') {
       setDepartureDate(date)
-      if (arrivalDate && arrivalDate < date) {
-        setArrivalDate(null)
+      if (returnDate && returnDate < date) {
+        setReturnDate(null)
       }
-    } else if (activeDateField === 'arrival') {
-      setArrivalDate(date)
+    } else if (activeDateField === 'return') {
+      setReturnDate(date)
     }
   }
 
@@ -99,19 +99,15 @@ export default function HomeScreen({ navigation }: Props) {
   ] as const
 
   const dateFields = [
-    { field: 'departure', label: 'Departure Date', date: departureDate },
-    {
-      field: 'arrival',
-      label: 'Arrival Date',
-      date: arrivalDate,
-    },
+    { field: 'departure', label: 'Departure Date', date: departureDate, placeholder: 'Choose date' },
+    { field: 'return', label: 'Return Date', date: returnDate, placeholder: 'One way (optional)' },
   ] as const
 
   const airportErrors = validateAirports(origin?.code, destination?.code)
   const areAirportsValid = !airportErrors.origin && !airportErrors.destination && !airportErrors.route
 
-  const dateErrors = validateFlightDates(departureDate, arrivalDate)
-  const areDatesValid = !dateErrors.departure && !dateErrors.arrival && !dateErrors.range
+  const dateErrors = validateFlightDates(departureDate, returnDate)
+  const areDatesValid = !dateErrors.departure && !dateErrors.range
   const handleSearch = () => {
     setHasSubmitted(true)
     if (
@@ -120,7 +116,6 @@ export default function HomeScreen({ navigation }: Props) {
       !origin ||
       !destination ||
       !departureDate ||
-      !arrivalDate ||
       isSavingSearch
     )
       return
@@ -129,7 +124,7 @@ export default function HomeScreen({ navigation }: Props) {
       originCode: origin.code,
       destinationCode: destination.code,
       departureDate,
-      arrivalDate,
+      returnDate,
     }
 
     dispatch(saveRecentSearch(criteria))
@@ -151,7 +146,7 @@ export default function HomeScreen({ navigation }: Props) {
       setOrigin(savedOrigin)
       setDestination(savedDestination)
       setDepartureDate(search.departureDate)
-      setArrivalDate(search.arrivalDate)
+      setReturnDate(search.returnDate)
       setHasSubmitted(false)
       setAirportsError('')
     } catch {
@@ -220,48 +215,65 @@ export default function HomeScreen({ navigation }: Props) {
             )
           })}
 
-          {dateFields.map(({ field, label, date }) => {
-            const fieldError = hasSubmitted ? dateErrors[field] : null
+          {dateFields.map(({ field, label, date, placeholder }) => {
+            const fieldError = hasSubmitted && field === 'departure' ? dateErrors.departure : null
             const isInvalid = Boolean(fieldError || dateErrors.range)
-            const errorMessage = fieldError ?? (field === 'arrival' ? dateErrors.range : null)
+            const errorMessage = fieldError ?? (field === 'return' ? dateErrors.range : null)
+            const canClear = field === 'return' && date !== null
 
             return (
               <View key={field} style={styles.field}>
                 <Text style={[typography.label, { color: theme.colors.text }]}>{label}</Text>
 
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={`${label}: ${date ?? 'Choose date'}`}
-                  onPress={() => openDatePicker(field)}
-                  style={({ pressed }) => [
-                    styles.airportInput,
-                    {
-                      borderColor: isInvalid ? theme.colors.error : theme.colors.inputBorder,
-                      backgroundColor: pressed ? theme.colors.surfaceMuted : theme.colors.surface,
-                    },
-                  ]}
-                >
-                  <Ionicons name="calendar" size={sizes.icon} color={theme.colors.text} accessible={false} />
-
-                  <Text
-                    style={[
-                      typography.body,
-                      styles.fieldValue,
+                <View>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={`${label}: ${date ? formatDate(date) : placeholder}`}
+                    onPress={() => openDatePicker(field)}
+                    style={({ pressed }) => [
+                      styles.airportInput,
                       {
-                        color: date ? theme.colors.text : theme.colors.placeholder,
+                        borderColor: isInvalid ? theme.colors.error : theme.colors.inputBorder,
+                        backgroundColor: pressed ? theme.colors.surfaceMuted : theme.colors.surface,
                       },
                     ]}
                   >
-                    {date ? formatDate(date) : 'Choose date'}
-                  </Text>
+                    <Ionicons name="calendar" size={sizes.icon} color={theme.colors.text} accessible={false} />
 
-                  <Ionicons
-                    name="chevron-down"
-                    size={sizes.iconSmall}
-                    color={theme.colors.textMuted}
-                    accessible={false}
-                  />
-                </Pressable>
+                    <Text
+                      style={[
+                        typography.body,
+                        styles.fieldValue,
+                        {
+                          color: date ? theme.colors.text : theme.colors.placeholder,
+                        },
+                      ]}
+                    >
+                      {date ? formatDate(date) : placeholder}
+                    </Text>
+
+                    {!canClear && (
+                      <Ionicons
+                        name="chevron-down"
+                        size={sizes.iconSmall}
+                        color={theme.colors.textMuted}
+                        accessible={false}
+                      />
+                    )}
+                  </Pressable>
+
+                  {canClear && (
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel="Clear return date"
+                      onPress={() => setReturnDate(null)}
+                      hitSlop={spacing.sm}
+                      style={styles.clearDate}
+                    >
+                      <Ionicons name="close-circle" size={sizes.icon} color={theme.colors.textMuted} accessible={false} />
+                    </Pressable>
+                  )}
+                </View>
                 {errorMessage && (
                   <Text style={[typography.caption, { color: theme.colors.error }]}>{errorMessage}</Text>
                 )}
@@ -345,9 +357,9 @@ export default function HomeScreen({ navigation }: Props) {
       <DatePicker
         key={activeDateField ?? 'closed'}
         visible={activeDateField !== null}
-        title={activeDateField === 'departure' ? 'Choose departure date' : 'Choose arrival date'}
-        value={activeDateField === 'departure' ? departureDate : arrivalDate}
-        minDate={activeDateField === 'arrival' ? (departureDate ?? undefined) : undefined}
+        title={activeDateField === 'departure' ? 'Choose departure date' : 'Choose return date'}
+        value={activeDateField === 'departure' ? departureDate : returnDate}
+        minDate={activeDateField === 'return' ? (departureDate ?? undefined) : undefined}
         onConfirm={confirmDate}
         onClose={() => setActiveDateField(null)}
       />
@@ -387,6 +399,13 @@ const styles = StyleSheet.create({
   },
   fieldValue: {
     flex: 1,
+  },
+  clearDate: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    right: spacing.lg,
+    justifyContent: 'center',
   },
   searchButton: {
     minHeight: sizes.buttonMinHeight,

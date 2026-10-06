@@ -4,7 +4,7 @@ export type FlightSearchCriteria = {
   originCode: string
   destinationCode: string
   departureDate: string
-  arrivalDate: string
+  returnDate: string | null
 }
 
 export type RecentSearch = FlightSearchCriteria & {
@@ -25,6 +25,11 @@ export type Flight = {
   departureGate: string
   arrivalGate: string
   status: 'on-time' | 'delayed' | 'cancelled'
+}
+
+export type FlightSearchResults = {
+  outboundFlights: Flight[]
+  returnFlights: Flight[]
 }
 
 export type Favorite = {

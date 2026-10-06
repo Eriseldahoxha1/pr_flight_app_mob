@@ -1,18 +1,29 @@
 import { HttpClient } from '../libs/http/http-client'
-import type { Flight, FlightSearchCriteria } from '../types/flight'
+import type { Flight, FlightSearchCriteria, FlightSearchResults } from '../types/flight'
+
+const findFlights = (flights: Flight[], from: string, to: string, date: string) =>
+  flights
+    .filter(
+      flight =>
+        flight.departureAirport.code === from &&
+        flight.arrivalAirport.code === to &&
+        flight.departureAt.slice(0, 10) === date,
+    )
+    .sort((first, second) => Date.parse(first.departureAt) - Date.parse(second.departureAt))
 
 class FlightService {
-  searchFlights = async (criteria: FlightSearchCriteria): Promise<Flight[]> => {
+  searchFlights = async ({
+    originCode,
+    destinationCode,
+    departureDate,
+    returnDate,
+  }: FlightSearchCriteria): Promise<FlightSearchResults> => {
     const flights = await HttpClient.get<Flight[]>('flights')
-    return flights
-      .filter(
-        flight =>
-          flight.departureAirport.code === criteria.originCode &&
-          flight.arrivalAirport.code === criteria.destinationCode &&
-          flight.departureAt.slice(0, 10) === criteria.departureDate &&
-          flight.arrivalAt.slice(0, 10) === criteria.arrivalDate,
-      )
-      .sort((first, second) => Date.parse(first.departureAt) - Date.parse(second.departureAt))
+
+    return {
+      outboundFlights: findFlights(flights, originCode, destinationCode, departureDate),
+      returnFlights: returnDate ? findFlights(flights, destinationCode, originCode, returnDate) : [],
+    }
   }
 
   getFlight = (id: string) => HttpClient.get<Flight>(`flights/${encodeURIComponent(id)}`)

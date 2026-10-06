@@ -12,7 +12,7 @@ import FlightCard from '../components/FlightCard'
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'SearchResults'>
 
-export default function SearchResultsScreen({ route }: Props) {
+export default function SearchResultsScreen({ route, navigation }: Props) {
   const theme = useAppTheme()
   const { originCode, destinationCode, departureDate, arrivalDate } = route.params
 
@@ -72,8 +72,8 @@ export default function SearchResultsScreen({ route }: Props) {
     }
   }, [loadFlights])
 
-  const onFlightCardPress = () => {
-    console.log('1')
+  const onFlightCardPress = (flightId: string) => {
+    navigation.navigate('FlightDetails', { flightId })
   }
 
   const onToggleFavFlight = () => {
@@ -126,7 +126,7 @@ export default function SearchResultsScreen({ route }: Props) {
             <FlightCard
               flight={item}
               isFavorite={false}
-              onPress={onFlightCardPress}
+              onPress={() => onFlightCardPress(item.id)}
               onToggleFavorite={onToggleFavFlight}
             />
           )}

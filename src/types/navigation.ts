@@ -16,4 +16,5 @@ export type MoreStackParamList = {
 export type HomeStackParamList = {
   Dashboard: undefined
   SearchResults: FlightSearchCriteria
+  FlightDetails: { flightId: string }
 }

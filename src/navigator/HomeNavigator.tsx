@@ -5,6 +5,7 @@ import { useAppTheme } from '../hooks/useAppTheme'
 import { typography } from '../theme/tokens'
 import { getHeaderTitle, Header } from '@react-navigation/elements'
 import SearchResultsScreen from '../screens/SearchResultsScreen'
+import FlightDetailsScreen from '../screens/FlightDetailsScreen'
 
 const Stack = createNativeStackNavigator<HomeStackParamList>()
 
@@ -35,6 +36,7 @@ export default function HomeNavigator() {
     >
       <Stack.Screen name="Dashboard" component={HomeScreen} options={{ title: 'Home' }} />
       <Stack.Screen name="SearchResults" component={SearchResultsScreen} options={{ title: 'Search Results' }} />
+      <Stack.Screen name="FlightDetails" component={FlightDetailsScreen} options={{ title: 'Flight Details' }} />
     </Stack.Navigator>
   )
 }

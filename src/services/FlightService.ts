@@ -14,6 +14,8 @@ class FlightService {
       )
       .sort((first, second) => Date.parse(first.departureAt) - Date.parse(second.departureAt))
   }
+
+  getFlight = (id: string) => HttpClient.get<Flight>(`flights/${encodeURIComponent(id)}`)
 }
 
 export default new FlightService()

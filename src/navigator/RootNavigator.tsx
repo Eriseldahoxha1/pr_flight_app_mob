@@ -4,6 +4,8 @@ import { useAppDispatch } from '../store/hooks'
 import { deleteItemAsync, getItemAsync } from 'expo-secure-store'
 import { logout, setAuthInitialized, setSession } from '../store/authSlice'
 import UserService from '../services/UserService'
+import ThemeService from '../services/ThemeService'
+import { setThemePreference } from '../store/themeSlice'
 import { isAxiosError } from 'axios'
 import Toast from 'react-native-toast-message'
 import { RootStackParamList } from '../types/navigation'
@@ -69,12 +71,17 @@ export default function RootNavigator() {
           type: 'error',
           text1: invalidSession ? 'Please log in again' : 'Could not restore your session. Reopen the app to retry.',
         })
-      } finally {
-        if (!cancelled) dispatch(setAuthInitialized())
       }
     }
 
-    void restoreSession()
+    async function restoreThemePreference() {
+      const preference = await ThemeService.getPreference()
+      if (!cancelled) dispatch(setThemePreference(preference))
+    }
+
+    void Promise.all([restoreSession(), restoreThemePreference()]).finally(() => {
+      if (!cancelled) dispatch(setAuthInitialized())
+    })
 
     return () => {
       cancelled = true

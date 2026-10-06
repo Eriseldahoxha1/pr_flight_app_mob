@@ -1,18 +1,27 @@
-import { ScrollView, StyleSheet, Text, View, Switch, Pressable } from 'react-native'
+import { ScrollView, StyleSheet, Text, View, Pressable } from 'react-native'
 import { useAppTheme } from '../hooks/useAppTheme'
 import { radii, spacing, typography, sizes } from '../theme/tokens'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import Ionicons from '@expo/vector-icons/Ionicons'
-import { setThemeMode } from '../store/themeSlice'
+import { setThemePreference } from '../store/themeSlice'
 import { useState } from 'react'
 import { deleteItemAsync } from 'expo-secure-store'
 import { logout } from '../store/authSlice'
 import Toast from 'react-native-toast-message'
+import ThemeService from '../services/ThemeService'
+import type { ThemePreference } from '../types/theme'
+
+const themeOptions: { value: ThemePreference; label: string }[] = [
+  { value: 'system', label: 'System' },
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
+]
 
 export default function ProfileScreen() {
   const theme = useAppTheme()
   const dispatch = useAppDispatch()
   const user = useAppSelector(state => state.auth.user)
+  const themePreference = useAppSelector(state => state.theme.preference)
 
   const [isLoggingOut, setIsLoggingOut] = useState(false)
 
@@ -40,6 +49,17 @@ export default function ProfileScreen() {
     } finally {
       setIsLoggingOut(false)
     }
+  }
+
+  const onSelectTheme = (preference: ThemePreference) => {
+    dispatch(setThemePreference(preference))
+    ThemeService.savePreference(preference).catch(() => {
+      Toast.show({
+        type: 'error',
+        text1: 'Could not save your theme choice',
+        text2: 'It applies now, but will reset when the app restarts.',
+      })
+    })
   }
 
   return (
@@ -75,22 +95,37 @@ export default function ProfileScreen() {
           },
         ]}
       >
-        <View style={styles.row}>
-          <Ionicons name="moon-outline" size={sizes.icon} color={theme.colors.text} accessible={false} />
-          <Text style={[typography.body, { flex: 1, color: theme.colors.text }]}>Dark mode</Text>
+        <View style={styles.themeSetting}>
+          <View style={styles.themeHeader}>
+            <Ionicons name="moon-outline" size={sizes.icon} color={theme.colors.text} accessible={false} />
+            <Text style={[typography.body, { color: theme.colors.text }]}>Appearance</Text>
+          </View>
 
-          <Switch
-            accessibilityLabel="Dark mode"
-            value={theme.dark}
-            onValueChange={enabled => {
-              dispatch(setThemeMode(enabled ? 'dark' : 'light'))
-            }}
-            trackColor={{
-              false: theme.colors.border,
-              true: theme.colors.primary,
-            }}
-            ios_backgroundColor={theme.colors.border}
-          />
+          <View
+            accessibilityRole="radiogroup"
+            accessibilityLabel="Appearance"
+            style={[styles.segmented, { backgroundColor: theme.colors.surfaceMuted }]}
+          >
+            {themeOptions.map(option => {
+              const isSelected = option.value === themePreference
+
+              return (
+                <Pressable
+                  key={option.value}
+                  accessibilityRole="radio"
+                  accessibilityState={{ checked: isSelected }}
+                  onPress={() => onSelectTheme(option.value)}
+                  style={[styles.segment, isSelected && { backgroundColor: theme.colors.primary }]}
+                >
+                  <Text
+                    style={[typography.label, { color: isSelected ? theme.colors.onPrimary : theme.colors.text }]}
+                  >
+                    {option.label}
+                  </Text>
+                </Pressable>
+              )
+            })}
+          </View>
         </View>
       </View>
 
@@ -155,6 +190,28 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: sizes.borderWidth,
+  },
+  themeSetting: {
+    gap: spacing.md,
+    paddingVertical: spacing.lg,
+  },
+  themeHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  segmented: {
+    flexDirection: 'row',
+    gap: spacing.xs,
+    padding: spacing.xs,
+    borderRadius: radii.md,
+  },
+  segment: {
+    flex: 1,
+    minHeight: sizes.touchTarget,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radii.sm,
   },
   logoutButton: {
     minHeight: sizes.buttonMinHeight,

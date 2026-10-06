@@ -36,7 +36,7 @@ export default function MoreNavigator() {
         },
       }}
     >
-      <Stack.Screen name="MoreMenu" component={MoreScreen} />
+      <Stack.Screen name="MoreMenu" component={MoreScreen} options={{ title: 'More' }} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
       <Stack.Screen name="Help" component={HelpScreen} />
       <Stack.Screen name="About" component={AboutScreen} />

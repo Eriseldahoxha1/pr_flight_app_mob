@@ -19,6 +19,7 @@ import { useAppDispatch } from '../store/hooks'
 import { setSession } from '../store/authSlice'
 import { setItemAsync } from 'expo-secure-store'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { StatusBar } from 'expo-status-bar'
 import { useAppTheme } from '../hooks/useAppTheme'
 import { AppTheme } from '../theme/themes'
 import { radii, sizes, spacing, typography } from '../theme/tokens'
@@ -66,6 +67,7 @@ const LoginScreen = () => {
 
   return (
     <View style={styles.container}>
+      <StatusBar style="light" />
       <KeyboardAvoidingView behavior="height" style={styles.keyboardContainer} enabled={Platform.OS === 'android'}>
         <ScrollView
           style={{ flex: 1 }}
@@ -151,7 +153,7 @@ const createStyles = (theme: AppTheme) =>
       flex: 1,
     },
     hero: {
-      backgroundColor: theme.colors.header,
+      backgroundColor: theme.colors.brand,
     },
 
     airplane: {

@@ -6,13 +6,10 @@ import RootNavigator from './src/navigator/RootNavigator'
 import RootLayout from './src/components/layouts/RootLayout'
 import { store } from './src/store'
 import { useAppTheme } from './src/hooks/useAppTheme'
-import { useAppSelector } from './src/store/hooks'
 
 function AppContent() {
   const theme = useAppTheme()
-  const { isInitialized } = useAppSelector(state => state.auth)
   const baseTheme = theme.dark ? DarkTheme : DefaultTheme
-  const needsDarkStatusBar = !isInitialized && !theme.dark
 
   const navigationTheme = {
     ...baseTheme,
@@ -32,7 +29,7 @@ function AppContent() {
       <NavigationContainer theme={navigationTheme}>
         <RootNavigator />
       </NavigationContainer>
-      <StatusBar style={needsDarkStatusBar ? 'dark' : 'light'} />
+      <StatusBar style={theme.dark ? 'light' : 'dark'} />
     </RootLayout>
   )
 }

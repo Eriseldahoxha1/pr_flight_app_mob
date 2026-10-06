@@ -84,34 +84,29 @@ export default function SearchResultsScreen({ route, navigation }: Props) {
     navigation.navigate('FlightDetails', { flightId })
   }
 
-  const sections = results
-    ? [
-        {
-          title: `Outbound · ${originCode} → ${destinationCode} · ${formatDate(departureDate)}`,
-          data: results.outboundFlights,
-        },
-        ...(returnDate
-          ? [
-              {
-                title: `Return · ${destinationCode} → ${originCode} · ${formatDate(returnDate)}`,
-                data: results.returnFlights,
-              },
-            ]
-          : []),
-      ]
-    : []
+  const containerStyle = [styles.container, { backgroundColor: theme.colors.background }]
 
-  return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <Text style={[typography.title, { color: theme.colors.text }]}>
-        {originCode} → {destinationCode}
-      </Text>
-      {isLoading ? (
+  const routeTitle = (
+    <Text style={[typography.title, { color: theme.colors.text }]}>
+      {originCode} → {destinationCode}
+    </Text>
+  )
+
+  if (isLoading) {
+    return (
+      <View style={containerStyle}>
+        {routeTitle}
         <ActivityIndicator size="large" color={theme.colors.text} accessibilityLabel="Loading flights" />
-      ) : error ? (
+      </View>
+    )
+  }
+
+  if (error) {
+    return (
+      <View style={containerStyle}>
+        {routeTitle}
         <View>
           <Text style={[typography.body, { color: theme.colors.error }]}>{error}</Text>
-
           <Pressable
             accessibilityRole="button"
             onPress={() => {
@@ -122,52 +117,75 @@ export default function SearchResultsScreen({ route, navigation }: Props) {
             <Text style={[typography.label, { color: theme.colors.text }]}>Retry</Text>
           </Pressable>
         </View>
-      ) : (
-        <SectionList
-          style={{ flex: 1 }}
-          sections={sections}
-          refreshing={isRefreshing}
-          onRefresh={() => {
-            if (!isRefreshing) loadFlights(true)
-          }}
-          alwaysBounceVertical
-          stickySectionHeadersEnabled={false}
-          keyExtractor={flight => flight.id}
-          contentContainerStyle={styles.list}
-          showsVerticalScrollIndicator={false}
-          ListHeaderComponent={
+      </View>
+    )
+  }
+
+  const sections = []
+
+  if (results) {
+    sections.push({
+      title: `Outbound · ${originCode} → ${destinationCode} · ${formatDate(departureDate)}`,
+      data: results.outboundFlights,
+    })
+
+    if (returnDate) {
+      sections.push({
+        title: `Return · ${destinationCode} → ${originCode} · ${formatDate(returnDate)}`,
+        data: results.returnFlights,
+      })
+    }
+  }
+
+  return (
+    <View style={containerStyle}>
+      {routeTitle}
+      <SectionList
+        style={{ flex: 1 }}
+        sections={sections}
+        refreshing={isRefreshing}
+        onRefresh={() => {
+          if (!isRefreshing) loadFlights(true)
+        }}
+        alwaysBounceVertical
+        stickySectionHeadersEnabled={false}
+        keyExtractor={flight => flight.id}
+        contentContainerStyle={styles.list}
+        showsVerticalScrollIndicator={false}
+        ListHeaderComponent={
+          <Text style={[typography.body, { color: theme.colors.textMuted }]}>
+            {returnDate
+              ? `${formatDate(departureDate)} – ${formatDate(returnDate)}`
+              : `${formatDate(departureDate)} · One way`}
+          </Text>
+        }
+        renderSectionHeader={({ section }) => (
+          <Text style={[typography.subtitle, { color: theme.colors.text }]}>
+            {section.title} ({section.data.length})
+          </Text>
+        )}
+        renderSectionFooter={({ section }) => {
+          if (section.data.length > 0) return null
+
+          return (
             <Text style={[typography.body, { color: theme.colors.textMuted }]}>
-              {returnDate
-                ? `${formatDate(departureDate)} – ${formatDate(returnDate)}`
-                : `${formatDate(departureDate)} · One way`}
+              No flights on this date. Try a different date.
             </Text>
-          }
-          renderSectionHeader={({ section }) => (
-            <Text style={[typography.subtitle, { color: theme.colors.text }]}>
-              {section.title} ({section.data.length})
-            </Text>
-          )}
-          renderSectionFooter={({ section }) =>
-            section.data.length === 0 ? (
-              <Text style={[typography.body, { color: theme.colors.textMuted }]}>
-                No flights on this date. Try a different date.
-              </Text>
-            ) : null
-          }
-          renderItem={({ item }) => {
-            const isFavorite = favorites.some(favorite => favorite.flightId === item.id)
-            return (
-              <FlightCard
-                flight={item}
-                isFavorite={isFavorite}
-                isFavoriteDisabled={!areFavoritesReady || pendingFavorites[item.id] !== undefined}
-                onPress={() => onFlightCardPress(item.id)}
-                onToggleFavorite={() => toggleFavorite(item.id, isFavorite)}
-              />
-            )
-          }}
-        />
-      )}
+          )
+        }}
+        renderItem={({ item }) => {
+          const isFavorite = favorites.some(favorite => favorite.flightId === item.id)
+          return (
+            <FlightCard
+              flight={item}
+              isFavorite={isFavorite}
+              isFavoriteDisabled={!areFavoritesReady || pendingFavorites[item.id] !== undefined}
+              onPress={() => onFlightCardPress(item.id)}
+              onToggleFavorite={() => toggleFavorite(item.id, isFavorite)}
+            />
+          )
+        }}
+      />
     </View>
   )
 }

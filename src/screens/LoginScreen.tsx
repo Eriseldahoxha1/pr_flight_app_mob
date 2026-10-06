@@ -20,6 +20,7 @@ import { setSession } from '../store/authSlice'
 import { setItemAsync } from 'expo-secure-store'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
+import Ionicons from '@expo/vector-icons/Ionicons'
 import { useAppTheme } from '../hooks/useAppTheme'
 import { AppTheme } from '../theme/themes'
 import { radii, sizes, spacing, typography } from '../theme/tokens'
@@ -33,6 +34,7 @@ const LoginScreen = () => {
   const [email, setEmail] = useState<string>('')
   const [password, setPassword] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false)
 
   const handleLogin = async () => {
     setIsLoading(true)
@@ -104,19 +106,35 @@ const LoginScreen = () => {
             />
 
             <Text style={styles.label}>Password</Text>
-            <TextInput
-              style={styles.input}
-              value={password}
-              onChangeText={setPassword}
-              placeholder="Enter your password"
-              placeholderTextColor={theme.colors.placeholder}
-              secureTextEntry
-              autoCapitalize="none"
-              autoCorrect={false}
-              autoComplete="current-password"
-              accessibilityLabel="Password"
-              editable={!isLoading}
-            />
+            <View style={styles.passwordField}>
+              <TextInput
+                style={[styles.input, styles.passwordInput]}
+                value={password}
+                onChangeText={setPassword}
+                placeholder="Enter your password"
+                placeholderTextColor={theme.colors.placeholder}
+                secureTextEntry={!isPasswordVisible}
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="current-password"
+                accessibilityLabel="Password"
+                editable={!isLoading}
+              />
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={isPasswordVisible ? 'Hide password' : 'Show password'}
+                onPress={() => setIsPasswordVisible(visible => !visible)}
+                hitSlop={spacing.sm}
+                style={styles.passwordToggle}
+              >
+                <Ionicons
+                  name={isPasswordVisible ? 'eye-off-outline' : 'eye-outline'}
+                  size={sizes.icon}
+                  color={theme.colors.textMuted}
+                  accessible={false}
+                />
+              </Pressable>
+            </View>
 
             <Pressable
               onPress={handleLogin}
@@ -192,7 +210,7 @@ const createStyles = (theme: AppTheme) =>
     },
 
     input: {
-      ...typography.body,
+      ...typography.input,
       minHeight: sizes.inputMinHeight,
       borderWidth: sizes.borderWidth,
       borderColor: theme.colors.inputBorder,
@@ -202,6 +220,20 @@ const createStyles = (theme: AppTheme) =>
       paddingVertical: spacing.md,
       color: theme.colors.text,
       marginBottom: spacing.xl,
+    },
+    passwordField: {
+      marginBottom: spacing.xl,
+    },
+    passwordInput: {
+      marginBottom: 0,
+      paddingRight: spacing.lg + sizes.icon + spacing.md,
+    },
+    passwordToggle: {
+      position: 'absolute',
+      top: 0,
+      bottom: 0,
+      right: spacing.lg,
+      justifyContent: 'center',
     },
     button: {
       minHeight: sizes.buttonMinHeight,

@@ -49,6 +49,10 @@ export const typography = {
     lineHeight: 24,
     fontWeight: '400',
   },
+  input: {
+    fontSize: 16,
+    fontWeight: '400',
+  },
   label: {
     fontSize: 15,
     lineHeight: 22,

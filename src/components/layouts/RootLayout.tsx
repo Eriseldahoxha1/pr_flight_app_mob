@@ -35,20 +35,7 @@ export default function RootLayout({ children, hasHeader = false }: RootLayoutPr
 
   return (
     <>
-      <View
-        style={[
-          styles.container,
-          { backgroundColor: theme.colors.background },
-          // {
-          //   paddingTop: 24 + (hasHeader ? 0 : insets.top),
-          //   paddingBottom: 24 + insets.bottom,
-          //   paddingLeft: 24 + insets.left,
-          //   paddingRight: 24 + insets.right,
-          // },
-        ]}
-      >
-        {children}
-      </View>
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>{children}</View>
 
       <Toast config={toastConfig} topOffset={insets.top + 16} />
     </>

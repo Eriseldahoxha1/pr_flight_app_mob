@@ -117,7 +117,7 @@ export default function AirportPicker({
                 autoCapitalize="none"
                 autoCorrect={false}
                 editable={!isLoading && !error}
-                style={[typography.body, styles.searchInput, { color: theme.colors.text }]}
+                style={[typography.input, styles.searchInput, { color: theme.colors.text }]}
               />
 
               {search.length > 0 && (

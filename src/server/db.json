@@ -150,73 +150,91 @@
       "originCode": "TIA",
       "destinationCode": "CIA",
       "departureDate": "2026-10-08",
-      "arrivalDate": "2026-10-09",
+      "arrivalDate": "2026-10-31",
       "userId": 2,
-      "createdAt": "2026-10-05T22:03:57.959Z",
-      "id": 3
+      "createdAt": "2026-10-06T07:24:40.751Z",
+      "id": 11
     },
     {
       "originCode": "TIA",
+      "destinationCode": "FCO",
+      "departureDate": "2026-10-14",
+      "arrivalDate": "2026-10-31",
+      "userId": 2,
+      "createdAt": "2026-10-06T17:06:13.358Z",
+      "id": 12
+    },
+    {
+      "originCode": "TIA",
+      "destinationCode": "FCO",
+      "departureDate": "2026-10-12",
+      "arrivalDate": "2026-10-12",
+      "userId": 2,
+      "createdAt": "2026-10-06T17:06:23.671Z",
+      "id": 13
+    },
+    {
+      "originCode": "MUC",
       "destinationCode": "FRA",
-      "departureDate": "2026-10-24",
-      "arrivalDate": "2026-10-30",
+      "departureDate": "2026-10-12",
+      "arrivalDate": "2026-10-12",
       "userId": 2,
-      "createdAt": "2026-10-05T22:04:07.810Z",
-      "id": 4
+      "createdAt": "2026-10-06T17:07:04.695Z",
+      "id": 14
     },
     {
-      "originCode": "TIA",
+      "originCode": "MUC",
       "destinationCode": "FRA",
-      "departureDate": "2026-10-24",
-      "arrivalDate": "2026-10-30",
+      "departureDate": "2026-10-12",
+      "arrivalDate": "2026-10-12",
       "userId": 2,
-      "createdAt": "2026-10-05T22:07:53.214Z",
-      "id": 5
+      "createdAt": "2026-10-06T17:12:52.064Z",
+      "id": 15
     },
     {
       "originCode": "TIA",
-      "destinationCode": "FRA",
-      "departureDate": "2026-10-24",
-      "arrivalDate": "2026-10-30",
+      "destinationCode": "FCO",
+      "departureDate": "2026-10-12",
+      "arrivalDate": "2026-10-12",
       "userId": 2,
-      "createdAt": "2026-10-05T22:07:55.505Z",
-      "id": 6
+      "createdAt": "2026-10-06T17:13:13.835Z",
+      "id": 16
     },
     {
       "originCode": "TIA",
-      "destinationCode": "FRA",
-      "departureDate": "2026-10-24",
-      "arrivalDate": "2026-10-30",
+      "destinationCode": "FCO",
+      "departureDate": "2026-10-12",
+      "arrivalDate": "2026-10-12",
       "userId": 2,
-      "createdAt": "2026-10-05T22:08:04.623Z",
-      "id": 7
+      "createdAt": "2026-10-06T17:20:42.296Z",
+      "id": 17
     },
     {
       "originCode": "TIA",
-      "destinationCode": "MUC",
-      "departureDate": "2026-10-10",
-      "arrivalDate": "2026-10-11",
+      "destinationCode": "FCO",
+      "departureDate": "2026-10-12",
+      "arrivalDate": "2026-10-12",
       "userId": 2,
-      "createdAt": "2026-10-05T22:12:28.875Z",
-      "id": 8
+      "createdAt": "2026-10-06T17:21:50.929Z",
+      "id": 18
     },
     {
       "originCode": "TIA",
-      "destinationCode": "MUC",
-      "departureDate": "2026-10-10",
-      "arrivalDate": "2026-10-11",
+      "destinationCode": "FCO",
+      "departureDate": "2026-10-12",
+      "arrivalDate": "2026-10-12",
       "userId": 2,
-      "createdAt": "2026-10-05T22:12:40.642Z",
-      "id": 9
+      "createdAt": "2026-10-06T17:23:07.619Z",
+      "id": 19
     },
     {
       "originCode": "TIA",
-      "destinationCode": "MUC",
-      "departureDate": "2026-10-10",
-      "arrivalDate": "2026-10-11",
+      "destinationCode": "FCO",
+      "departureDate": "2026-10-12",
+      "arrivalDate": "2026-10-12",
       "userId": 2,
-      "createdAt": "2026-10-05T22:12:47.928Z",
-      "id": 10
+      "createdAt": "2026-10-06T18:07:06.553Z",
+      "id": 20
     }
   ]
 }

@@ -10,13 +10,17 @@ import DatePicker from '../components/DatePicker'
 import { validateAirports } from '../utils/validateAirports'
 import { validateFlightDates } from '../utils/validateFlightDates'
 import RecentSearches from '../components/RecentSearches'
-import type { RecentSearch } from '../types/flight'
+import type { FlightSearchCriteria, RecentSearch } from '../types/flight'
+import type { NativeStackScreenProps } from '@react-navigation/native-stack'
+import type { HomeStackParamList } from '../types/navigation'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { loadRecentSearches, saveRecentSearch } from '../store/recentSearchesSlice'
 import Toast from 'react-native-toast-message'
 import { formatDate } from '../utils/formatDate'
 
-export default function HomeScreen() {
+type Props = NativeStackScreenProps<HomeStackParamList, 'Dashboard'>
+
+export default function HomeScreen({ navigation }: Props) {
   const theme = useAppTheme()
   const dispatch = useAppDispatch()
   const userId = useAppSelector(state => state.auth.user?.id)
@@ -121,16 +125,15 @@ export default function HomeScreen() {
     )
       return
 
-    dispatch(
-      saveRecentSearch({
-        originCode: origin.code,
-        destinationCode: destination.code,
-        departureDate,
-        arrivalDate,
-      }),
-    )
+    const criteria: FlightSearchCriteria = {
+      originCode: origin.code,
+      destinationCode: destination.code,
+      departureDate,
+      arrivalDate,
+    }
 
-    // TODO: Navigate once Search Results is implemented.
+    dispatch(saveRecentSearch(criteria))
+    navigation.navigate('SearchResults', criteria)
   }
 
   const handleRecentSearch = async (search: RecentSearch) => {

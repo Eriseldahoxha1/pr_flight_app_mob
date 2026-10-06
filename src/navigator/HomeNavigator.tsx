@@ -4,6 +4,7 @@ import HomeScreen from '../screens/HomeScreen'
 import { useAppTheme } from '../hooks/useAppTheme'
 import { typography } from '../theme/tokens'
 import { getHeaderTitle, Header } from '@react-navigation/elements'
+import SearchResultsScreen from '../screens/SearchResultsScreen'
 
 const Stack = createNativeStackNavigator<HomeStackParamList>()
 
@@ -33,6 +34,7 @@ export default function HomeNavigator() {
       }}
     >
       <Stack.Screen name="Dashboard" component={HomeScreen} options={{ title: 'Home' }} />
+      <Stack.Screen name="SearchResults" component={SearchResultsScreen} options={{ title: 'Search Results' }} />
     </Stack.Navigator>
   )
 }

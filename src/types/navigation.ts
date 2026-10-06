@@ -1,3 +1,5 @@
+import { FlightSearchCriteria } from './flight'
+
 export type RootStackParamList = {
   Auth: undefined
   Main: undefined
@@ -13,4 +15,5 @@ export type MoreStackParamList = {
 
 export type HomeStackParamList = {
   Dashboard: undefined
+  SearchResults: FlightSearchCriteria
 }

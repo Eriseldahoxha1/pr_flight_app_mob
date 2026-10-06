@@ -5,16 +5,22 @@ class RecentSearchService {
   getSearches = (userId: number) =>
     HttpClient.get<RecentSearch[]>('/640/recentSearches', { userId, _sort: 'createdAt,id', _order: 'desc,desc' })
 
-  saveSearch = async (userId: number, criteria: FlightSearchCriteria) => {
-    await HttpClient.post<RecentSearch>('/600/recentSearches', {
+  saveSearch = (userId: number, criteria: FlightSearchCriteria) =>
+    HttpClient.post<RecentSearch>('/600/recentSearches', {
       ...criteria,
       userId,
       createdAt: new Date().toISOString(),
     })
 
+  refreshSearches = async (userId: number) => {
     const searches = await this.getSearches(userId)
-    await Promise.all(searches.slice(10).map(search => HttpClient.instance.delete(`/600/recentSearches/${search.id}`)))
-    return searches.slice(0, 10)
+    const results = await Promise.allSettled(
+      searches.slice(10).map(search => HttpClient.instance.delete(`/600/recentSearches/${search.id}`)),
+    )
+    return {
+      searches: searches.slice(0, 10),
+      cleanupFailed: results.some(result => result.status === 'rejected'),
+    }
   }
 }
 

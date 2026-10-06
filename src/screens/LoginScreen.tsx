@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import {
   KeyboardAvoidingView,
   Pressable,
@@ -12,8 +12,8 @@ import {
   Image,
   Platform,
 } from 'react-native'
+import { isAxiosError } from 'axios'
 import AuthService from '../services/AuthService'
-import Toast from 'react-native-toast-message'
 import { validateEmail, validatePassword } from '../utils/validation'
 import { useAppDispatch } from '../store/hooks'
 import { setSession } from '../store/authSlice'
@@ -25,6 +25,15 @@ import { useAppTheme } from '../hooks/useAppTheme'
 import { AppTheme } from '../theme/themes'
 import { radii, sizes, spacing, typography } from '../theme/tokens'
 
+const getLoginErrorMessage = (error: unknown) => {
+  if (isAxiosError(error)) {
+    if (!error.response) return "Can't reach the server. Check your connection and try again."
+    if (error.response.status === 400 || error.response.status === 401) return 'Incorrect email or password.'
+  }
+
+  return 'Something went wrong. Please try again.'
+}
+
 const LoginScreen = () => {
   const dispatch = useAppDispatch()
   const insets = useSafeAreaInsets()
@@ -35,32 +44,39 @@ const LoginScreen = () => {
   const [password, setPassword] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
+  const [hasSubmitted, setHasSubmitted] = useState(false)
+  const [loginError, setLoginError] = useState<string | null>(null)
+  const passwordInput = useRef<TextInput>(null)
+
+  const normalizedEmail = email.trim().toLowerCase()
+  const emailError = hasSubmitted ? validateEmail(normalizedEmail) : ''
+  const passwordError = hasSubmitted ? validatePassword(password) : ''
+
+  const changeEmail = (value: string) => {
+    setEmail(value)
+    setLoginError(null)
+  }
+
+  const changePassword = (value: string) => {
+    setPassword(value)
+    setLoginError(null)
+  }
 
   const handleLogin = async () => {
-    setIsLoading(true)
-    const trimmedEmail: string = email.trim()
-    const error = validateEmail(trimmedEmail) || validatePassword(password)
-    if (error) {
-      Toast.show({
-        type: 'error',
-        text1: 'Validation error',
-        text2: error,
-      })
-      setIsLoading(false)
-      return
-    }
+    setHasSubmitted(true)
+    setLoginError(null)
+
+    if (validateEmail(normalizedEmail) || validatePassword(password)) return
 
     Keyboard.dismiss()
+    setIsLoading(true)
+
     try {
-      const { accessToken, user } = await AuthService.login({ email: trimmedEmail, password })
+      const { accessToken, user } = await AuthService.login({ email: normalizedEmail, password })
       await setItemAsync('session', JSON.stringify({ accessToken, userId: user.id }))
       dispatch(setSession({ accessToken, user }))
     } catch (error) {
-      console.log('Failed login:' + error)
-      Toast.show({
-        type: 'error',
-        text1: 'Error logging in',
-      })
+      setLoginError(getLoginErrorMessage(error))
     } finally {
       setIsLoading(false)
     }
@@ -90,50 +106,66 @@ const LoginScreen = () => {
             <Text style={styles.title}>Welcome aboard</Text>
             <Text style={styles.subtitle}>Log in to manage your next journey.</Text>
 
-            <Text style={styles.label}>Email address</Text>
-            <TextInput
-              style={styles.input}
-              value={email}
-              onChangeText={setEmail}
-              placeholder="you@example.com"
-              placeholderTextColor={theme.colors.placeholder}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              autoComplete="email"
-              accessibilityLabel="Email address"
-              editable={!isLoading}
-            />
-
-            <Text style={styles.label}>Password</Text>
-            <View style={styles.passwordField}>
+            <View style={styles.field}>
+              <Text style={styles.label}>Email address</Text>
               <TextInput
-                style={[styles.input, styles.passwordInput]}
-                value={password}
-                onChangeText={setPassword}
-                placeholder="Enter your password"
+                style={[styles.input, emailError ? styles.inputInvalid : null]}
+                value={email}
+                onChangeText={changeEmail}
+                placeholder="you@example.com"
                 placeholderTextColor={theme.colors.placeholder}
-                secureTextEntry={!isPasswordVisible}
+                keyboardType="email-address"
+                textContentType="username"
                 autoCapitalize="none"
                 autoCorrect={false}
-                autoComplete="current-password"
-                accessibilityLabel="Password"
+                autoComplete="email"
+                returnKeyType="next"
+                submitBehavior="submit"
+                onSubmitEditing={() => passwordInput.current?.focus()}
+                accessibilityLabel="Email address"
+                accessibilityHint={emailError || undefined}
                 editable={!isLoading}
               />
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={isPasswordVisible ? 'Hide password' : 'Show password'}
-                onPress={() => setIsPasswordVisible(visible => !visible)}
-                hitSlop={spacing.sm}
-                style={styles.passwordToggle}
-              >
-                <Ionicons
-                  name={isPasswordVisible ? 'eye-off-outline' : 'eye-outline'}
-                  size={sizes.icon}
-                  color={theme.colors.textMuted}
-                  accessible={false}
+              <Text style={styles.fieldError}>{emailError}</Text>
+            </View>
+
+            <View style={styles.field}>
+              <Text style={styles.label}>Password</Text>
+              <View>
+                <TextInput
+                  ref={passwordInput}
+                  style={[styles.input, styles.passwordInput, passwordError ? styles.inputInvalid : null]}
+                  value={password}
+                  onChangeText={changePassword}
+                  placeholder="Enter your password"
+                  placeholderTextColor={theme.colors.placeholder}
+                  secureTextEntry={!isPasswordVisible}
+                  textContentType="password"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  autoComplete="current-password"
+                  returnKeyType="go"
+                  onSubmitEditing={() => void handleLogin()}
+                  accessibilityLabel="Password"
+                  accessibilityHint={passwordError || undefined}
+                  editable={!isLoading}
                 />
-              </Pressable>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={isPasswordVisible ? 'Hide password' : 'Show password'}
+                  onPress={() => setIsPasswordVisible(visible => !visible)}
+                  hitSlop={spacing.sm}
+                  style={styles.passwordToggle}
+                >
+                  <Ionicons
+                    name={isPasswordVisible ? 'eye-off-outline' : 'eye-outline'}
+                    size={sizes.icon}
+                    color={theme.colors.textMuted}
+                    accessible={false}
+                  />
+                </Pressable>
+              </View>
+              <Text style={styles.fieldError}>{passwordError}</Text>
             </View>
 
             <Pressable
@@ -150,6 +182,12 @@ const LoginScreen = () => {
               {isLoading && <ActivityIndicator size="small" color={theme.colors.onPrimary} />}
               <Text style={styles.buttonText}>{isLoading ? 'Logging in…' : 'Log in'}</Text>
             </Pressable>
+
+            {loginError && (
+              <Text accessibilityRole="alert" style={styles.loginError}>
+                {loginError}
+              </Text>
+            )}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -203,10 +241,13 @@ const createStyles = (theme: AppTheme) =>
       marginBottom: spacing.xxl,
     },
 
+    field: {
+      gap: spacing.sm,
+    },
+
     label: {
       ...typography.label,
       color: theme.colors.text,
-      marginBottom: spacing.sm,
     },
 
     input: {
@@ -219,13 +260,22 @@ const createStyles = (theme: AppTheme) =>
       paddingHorizontal: spacing.lg,
       paddingVertical: spacing.md,
       color: theme.colors.text,
-      marginBottom: spacing.xl,
     },
-    passwordField: {
-      marginBottom: spacing.xl,
+    inputInvalid: {
+      borderColor: theme.colors.error,
+    },
+    fieldError: {
+      ...typography.caption,
+      minHeight: typography.caption.lineHeight,
+      color: theme.colors.error,
+    },
+    loginError: {
+      ...typography.body,
+      color: theme.colors.error,
+      textAlign: 'center',
+      marginTop: spacing.md,
     },
     passwordInput: {
-      marginBottom: 0,
       paddingRight: spacing.lg + sizes.icon + spacing.md,
     },
     passwordToggle: {

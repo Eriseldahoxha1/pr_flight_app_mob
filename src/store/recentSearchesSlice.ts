@@ -1,16 +1,11 @@
-import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit'
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from './index'
 import type { FlightSearchCriteria, RecentSearch } from '../types/flight'
-import { logout, setSession } from './authSlice'
+import { logout, requireUserId, setSession } from './authSlice'
+import { createAppAsyncThunk } from './hooks'
 import RecentSearchService from '../services/RecentSearchService'
 
 const MAX_RECENT_SEARCHES = 10
-
-const requireUserId = (state: RootState) => {
-  const userId = state.auth.user?.id
-  if (!userId) throw new Error('Not logged in')
-  return userId
-}
 
 type HistoryResult = {
   searches: RecentSearch[] | null
@@ -19,18 +14,18 @@ type HistoryResult = {
 
 const cleanupWarning = 'History is up to date, but older entries could not be removed. Reload history to retry.'
 
-export const loadRecentSearches = createAsyncThunk<HistoryResult, void, { state: RootState }>(
+export const loadRecentSearches = createAppAsyncThunk(
   'recentSearches/load',
-  async (_, { getState }) => {
+  async (_: void, { getState }): Promise<HistoryResult> => {
     const result = await RecentSearchService.refreshSearches(requireUserId(getState()))
     return { searches: result.searches, warning: result.cleanupFailed ? cleanupWarning : null }
   },
   { condition: (_, { getState }) => !getState().recentSearches.saveRequestId },
 )
 
-export const saveRecentSearch = createAsyncThunk<HistoryResult, FlightSearchCriteria, { state: RootState }>(
+export const saveRecentSearch = createAppAsyncThunk(
   'recentSearches/save',
-  async (criteria, { getState, dispatch, requestId }) => {
+  async (criteria: FlightSearchCriteria, { getState, dispatch, requestId }): Promise<HistoryResult> => {
     const userId = requireUserId(getState())
     const savedSearch = await RecentSearchService.saveSearch(userId, criteria)
     // A logout or session change may have invalidated this request.

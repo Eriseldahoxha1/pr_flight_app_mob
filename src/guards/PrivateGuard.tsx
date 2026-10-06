@@ -3,6 +3,7 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { useAppSelector } from '../store/hooks'
+import { selectIsAuthenticated, selectIsAuthInitialized } from '../store/authSlice'
 import type { RootStackParamList } from '../types/navigation'
 import { useAppTheme } from '../hooks/useAppTheme'
 
@@ -14,7 +15,8 @@ export function PrivateGuard({ children }: PrivateGuardProps) {
   const theme = useAppTheme()
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
 
-  const { isAuthenticated, isInitialized } = useAppSelector(state => state.auth)
+  const isAuthenticated = useAppSelector(selectIsAuthenticated)
+  const isInitialized = useAppSelector(selectIsAuthInitialized)
 
   useEffect(() => {
     if (isInitialized && !isAuthenticated) {

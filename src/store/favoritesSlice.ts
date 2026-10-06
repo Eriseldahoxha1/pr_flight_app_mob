@@ -1,28 +1,24 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+import { createSlice } from '@reduxjs/toolkit'
 import type { Favorite } from '../types/flight'
-import { logout, setSession } from './authSlice'
+import { logout, requireUserId, setSession } from './authSlice'
+import { createAppAsyncThunk } from './hooks'
 import type { RootState } from './index'
 import FavoriteService from '../services/FavoriteService'
 
-const requireUserId = (state: RootState) => {
-  const userId = state.auth.user?.id
-  if (!userId) throw new Error('Not logged in')
-  return userId
-}
 const findFavorite = (state: RootState, flightId: string) =>
   state.favorites.items.find(favorite => favorite.flightId === flightId)
 
-export const loadFavorites = createAsyncThunk<Favorite[], void, { state: RootState }>(
+export const loadFavorites = createAppAsyncThunk(
   'favorites/load',
-  (_, { getState }) => FavoriteService.getFavorites(requireUserId(getState())),
+  (_: void, { getState }) => FavoriteService.getFavorites(requireUserId(getState())),
   {
     condition: (_, { getState }) => Object.keys(getState().favorites.pendingRequests).length === 0,
   },
 )
 
-export const addFavorite = createAsyncThunk<Favorite, string, { state: RootState }>(
+export const addFavorite = createAppAsyncThunk(
   'favorites/add',
-  (flightId, { getState }) => FavoriteService.addFavorite(requireUserId(getState()), flightId),
+  (flightId: string, { getState }) => FavoriteService.addFavorite(requireUserId(getState()), flightId),
   {
     condition: (flightId, { getState }) =>
       selectAreFavoritesReady(getState()) &&
@@ -31,9 +27,9 @@ export const addFavorite = createAsyncThunk<Favorite, string, { state: RootState
   },
 )
 
-export const removeFavorite = createAsyncThunk<void, string, { state: RootState }>(
+export const removeFavorite = createAppAsyncThunk(
   'favorites/remove',
-  async (flightId, { getState }) => {
+  async (flightId: string, { getState }) => {
     const favorite = findFavorite(getState(), flightId)
     if (favorite) await FavoriteService.removeFavorite(favorite.id)
   },

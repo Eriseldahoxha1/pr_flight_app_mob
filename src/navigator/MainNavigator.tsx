@@ -8,6 +8,7 @@ import MoreNavigator from './MoreNavigator'
 import HomeNavigator from './HomeNavigator'
 import { useEffect } from 'react'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
+import { selectUserId } from '../store/authSlice'
 import { loadFavorites } from '../store/favoritesSlice'
 import FavoritesNavigator from './FavoritesNavigator'
 
@@ -30,7 +31,7 @@ const Tab = createBottomTabNavigator<MainTabParamList>()
 export default function MainNavigator() {
   const theme = useAppTheme()
   const dispatch = useAppDispatch()
-  const userId = useAppSelector(state => state.auth.user?.id)
+  const userId = useAppSelector(selectUserId)
 
   useEffect(() => {
     const request = userId ? dispatch(loadFavorites()) : null

@@ -6,7 +6,7 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import { setThemePreference } from '../store/themeSlice'
 import { useState } from 'react'
 import { deleteItemAsync } from 'expo-secure-store'
-import { logout } from '../store/authSlice'
+import { logout, selectUser } from '../store/authSlice'
 import Toast from 'react-native-toast-message'
 import ThemeService from '../services/ThemeService'
 import type { ThemePreference } from '../types/theme'
@@ -21,7 +21,7 @@ const themeOptions: { value: ThemePreference; label: string }[] = [
 export default function ProfileScreen() {
   const theme = useAppTheme()
   const dispatch = useAppDispatch()
-  const user = useAppSelector(state => state.auth.user)
+  const user = useAppSelector(selectUser)
   const themePreference = useAppSelector(state => state.theme.preference)
 
   const [isLoggingOut, setIsLoggingOut] = useState(false)

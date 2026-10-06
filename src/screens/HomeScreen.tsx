@@ -14,6 +14,7 @@ import type { FlightSearchCriteria, RecentSearch } from '../types/flight'
 import type { NativeStackScreenProps } from '@react-navigation/native-stack'
 import type { HomeStackParamList } from '../types/navigation'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
+import { selectUserId } from '../store/authSlice'
 import { loadRecentSearches, saveRecentSearch } from '../store/recentSearchesSlice'
 import Toast from 'react-native-toast-message'
 import { formatDate } from '../utils/formatDate'
@@ -23,7 +24,7 @@ type Props = NativeStackScreenProps<HomeStackParamList, 'Dashboard'>
 export default function HomeScreen({ navigation }: Props) {
   const theme = useAppTheme()
   const dispatch = useAppDispatch()
-  const userId = useAppSelector(state => state.auth.user?.id)
+  const userId = useAppSelector(selectUserId)
   const history = useAppSelector(state => state.recentSearches)
   const isSavingSearch = Boolean(history.saveRequestId)
   const [isRefilling, setIsRefilling] = useState(false)

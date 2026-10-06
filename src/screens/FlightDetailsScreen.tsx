@@ -10,7 +10,7 @@ import { radii, sizes, spacing, typography } from '../theme/tokens'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { formatDate } from '../utils/formatDate'
 import { useAppSelector } from '../store/hooks'
-import { selectIsFavorite, selectIsFavoritePending } from '../store/favoritesSlice'
+import { selectAreFavoritesReady, selectIsFavorite, selectIsFavoritePending } from '../store/favoritesSlice'
 import { useToggleFavorite } from '../hooks/useToggleFavorite'
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'FlightDetails'>
@@ -26,6 +26,8 @@ export default function FlightDetailsScreen({ route }: Props) {
   const { flightId } = route.params
   const isFavorite = useAppSelector(state => selectIsFavorite(state, flightId))
   const isSavingFavorite = useAppSelector(state => selectIsFavoritePending(state, flightId))
+  const areFavoritesReady = useAppSelector(selectAreFavoritesReady)
+  const isFavoriteDisabled = !areFavoritesReady || isSavingFavorite
   const toggleFavorite = useToggleFavorite()
 
   const [flight, setFlight] = useState<Flight | null>(null)
@@ -166,13 +168,13 @@ export default function FlightDetailsScreen({ route }: Props) {
       </View>
       <Pressable
         onPress={() => toggleFavorite(flight.id, isFavorite)}
-        disabled={isSavingFavorite}
+        disabled={isFavoriteDisabled}
         accessibilityRole="button"
-        accessibilityState={{ disabled: isSavingFavorite, busy: isSavingFavorite }}
+        accessibilityState={{ disabled: isFavoriteDisabled, busy: isSavingFavorite }}
         style={({ pressed }) => [
           styles.favoriteButton,
           { backgroundColor: pressed ? theme.colors.primaryPressed : theme.colors.primary },
-          isSavingFavorite && styles.favoriteButtonDisabled,
+          isFavoriteDisabled && styles.favoriteButtonDisabled,
         ]}
       >
         {isSavingFavorite ? (

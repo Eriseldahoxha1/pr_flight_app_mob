@@ -11,12 +11,15 @@ import { formatDate } from '../utils/formatDate'
 import FlightCard from '../components/FlightCard'
 import { useAppSelector } from '../store/hooks'
 import { useToggleFavorite } from '../hooks/useToggleFavorite'
+import { selectAreFavoritesReady } from '../store/favoritesSlice'
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'SearchResults'>
 
 export default function SearchResultsScreen({ route, navigation }: Props) {
   const theme = useAppTheme()
   const favorites = useAppSelector(state => state.favorites.items)
+  const areFavoritesReady = useAppSelector(selectAreFavoritesReady)
+  const pendingFavorites = useAppSelector(state => state.favorites.pendingRequests)
   const toggleFavorite = useToggleFavorite()
 
   const { originCode, destinationCode, departureDate, returnDate } = route.params
@@ -157,6 +160,7 @@ export default function SearchResultsScreen({ route, navigation }: Props) {
               <FlightCard
                 flight={item}
                 isFavorite={isFavorite}
+                isFavoriteDisabled={!areFavoritesReady || pendingFavorites[item.id] !== undefined}
                 onPress={() => onFlightCardPress(item.id)}
                 onToggleFavorite={() => toggleFavorite(item.id, isFavorite)}
               />

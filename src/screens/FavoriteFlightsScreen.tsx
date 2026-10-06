@@ -8,7 +8,7 @@ import FlightCard from '../components/FlightCard'
 import { useAppTheme } from '../hooks/useAppTheme'
 import { useToggleFavorite } from '../hooks/useToggleFavorite'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
-import { loadFavorites, selectIsLoadingFavorites } from '../store/favoritesSlice'
+import { loadFavorites, selectAreFavoritesReady, selectIsLoadingFavorites } from '../store/favoritesSlice'
 import { sizes, spacing, typography } from '../theme/tokens'
 
 type Props = NativeStackScreenProps<FavoritesStackParamList, 'FavoriteFlightsList'>
@@ -19,6 +19,8 @@ export default function FavoriteFlightsScreen({ navigation }: Props) {
   const toggleFavorite = useToggleFavorite()
 
   const favorites = useAppSelector(state => state.favorites.items)
+  const areFavoritesReady = useAppSelector(selectAreFavoritesReady)
+  const pendingFavorites = useAppSelector(state => state.favorites.pendingRequests)
   const isLoadingFavorites = useAppSelector(selectIsLoadingFavorites)
   const favoritesError = useAppSelector(state => state.favorites.error)
 
@@ -87,6 +89,7 @@ export default function FavoriteFlightsScreen({ navigation }: Props) {
         <FlightCard
           flight={item}
           isFavorite
+          isFavoriteDisabled={!areFavoritesReady || pendingFavorites[item.id] !== undefined}
           onPress={() => navigation.navigate('FlightDetails', { flightId: item.id })}
           onToggleFavorite={() => toggleFavorite(item.id, true)}
         />

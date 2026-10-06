@@ -15,6 +15,9 @@ const findFavorite = (state: RootState, flightId: string) =>
 export const loadFavorites = createAsyncThunk<Favorite[], void, { state: RootState }>(
   'favorites/load',
   (_, { getState }) => FavoriteService.getFavorites(requireUserId(getState())),
+  {
+    condition: (_, { getState }) => Object.keys(getState().favorites.pendingRequests).length === 0,
+  },
 )
 
 export const addFavorite = createAsyncThunk<Favorite, string, { state: RootState }>(
@@ -22,7 +25,9 @@ export const addFavorite = createAsyncThunk<Favorite, string, { state: RootState
   (flightId, { getState }) => FavoriteService.addFavorite(requireUserId(getState()), flightId),
   {
     condition: (flightId, { getState }) =>
-      !getState().favorites.pendingFlightIds.includes(flightId) && !findFavorite(getState(), flightId),
+      selectAreFavoritesReady(getState()) &&
+      !selectIsFavoritePending(getState(), flightId) &&
+      !findFavorite(getState(), flightId),
   },
 )
 
@@ -34,21 +39,25 @@ export const removeFavorite = createAsyncThunk<void, string, { state: RootState 
   },
   {
     condition: (flightId, { getState }) =>
-      !getState().favorites.pendingFlightIds.includes(flightId) && !!findFavorite(getState(), flightId),
+      selectAreFavoritesReady(getState()) &&
+      !selectIsFavoritePending(getState(), flightId) &&
+      !!findFavorite(getState(), flightId),
   },
 )
 
 type FavoritesState = {
   items: Favorite[]
   loadRequestId: string | null
-  pendingFlightIds: string[]
+  pendingRequests: Partial<Record<string, string>>
+  hasLoaded: boolean
   error: string | null
 }
 
 const initialState: FavoritesState = {
   items: [],
   loadRequestId: null,
-  pendingFlightIds: [],
+  pendingRequests: {},
+  hasLoaded: false,
   error: null,
 }
 
@@ -67,6 +76,7 @@ const favoritesSlice = createSlice({
       .addCase(loadFavorites.fulfilled, (state, { meta, payload }) => {
         if (state.loadRequestId !== meta.requestId) return
         state.items = payload
+        state.hasLoaded = true
         state.loadRequestId = null
       })
       .addCase(loadFavorites.rejected, (state, { meta }) => {
@@ -75,28 +85,28 @@ const favoritesSlice = createSlice({
         state.error = 'Could not load favorites. Please retry.'
       })
       .addCase(addFavorite.pending, (state, { meta }) => {
-        state.pendingFlightIds.push(meta.arg)
+        state.pendingRequests[meta.arg] = meta.requestId
       })
       .addCase(addFavorite.fulfilled, (state, { meta, payload }) => {
-        if (!state.pendingFlightIds.includes(meta.arg)) return
-        state.pendingFlightIds = state.pendingFlightIds.filter(id => id !== meta.arg)
-        state.items.unshift(payload)
+        if (state.pendingRequests[meta.arg] !== meta.requestId) return
+        delete state.pendingRequests[meta.arg]
+        state.items = [payload, ...state.items.filter(favorite => favorite.flightId !== payload.flightId)]
       })
       .addCase(addFavorite.rejected, (state, { meta }) => {
-        if (!state.pendingFlightIds.includes(meta.arg)) return
-        state.pendingFlightIds = state.pendingFlightIds.filter(id => id !== meta.arg)
+        if (state.pendingRequests[meta.arg] !== meta.requestId) return
+        delete state.pendingRequests[meta.arg]
       })
       .addCase(removeFavorite.pending, (state, { meta }) => {
-        state.pendingFlightIds.push(meta.arg)
+        state.pendingRequests[meta.arg] = meta.requestId
       })
       .addCase(removeFavorite.fulfilled, (state, { meta }) => {
-        if (!state.pendingFlightIds.includes(meta.arg)) return
-        state.pendingFlightIds = state.pendingFlightIds.filter(id => id !== meta.arg)
+        if (state.pendingRequests[meta.arg] !== meta.requestId) return
+        delete state.pendingRequests[meta.arg]
         state.items = state.items.filter(favorite => favorite.flightId !== meta.arg)
       })
       .addCase(removeFavorite.rejected, (state, { meta }) => {
-        if (!state.pendingFlightIds.includes(meta.arg)) return
-        state.pendingFlightIds = state.pendingFlightIds.filter(id => id !== meta.arg)
+        if (state.pendingRequests[meta.arg] !== meta.requestId) return
+        delete state.pendingRequests[meta.arg]
       })
   },
 })
@@ -106,6 +116,9 @@ export default favoritesSlice.reducer
 export const selectIsFavorite = (state: RootState, flightId: string) => !!findFavorite(state, flightId)
 
 export const selectIsFavoritePending = (state: RootState, flightId: string) =>
-  state.favorites.pendingFlightIds.includes(flightId)
+  state.favorites.pendingRequests[flightId] !== undefined
+
+export const selectAreFavoritesReady = (state: RootState) =>
+  state.favorites.hasLoaded && state.favorites.loadRequestId === null
 
 export const selectIsLoadingFavorites = (state: RootState) => state.favorites.loadRequestId !== null

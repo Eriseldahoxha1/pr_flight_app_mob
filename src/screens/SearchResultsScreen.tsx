@@ -3,6 +3,7 @@ import { ActivityIndicator, Pressable, SectionList, StyleSheet, Text, View } fro
 import type { HomeStackParamList } from '../types/navigation'
 import { useAppTheme } from '../hooks/useAppTheme'
 import { spacing, typography } from '../theme/tokens'
+import { commonLabels, searchResultsLabels } from '../constants/labels'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Toast from 'react-native-toast-message'
 import FlightService from '../services/FlightService'
@@ -55,11 +56,11 @@ export default function SearchResultsScreen({ route, navigation }: Props) {
         if (refresh) {
           Toast.show({
             type: 'error',
-            text1: 'Could not refresh flights',
-            text2: 'Check your connection and try again.',
+            text1: searchResultsLabels.refreshError,
+            text2: searchResultsLabels.refreshErrorDetail,
           })
         } else {
-          setError('Could not load flights. Check your connection and try again.')
+          setError(searchResultsLabels.loadError)
         }
       } finally {
         if (currentRequest === requestId.current) {
@@ -96,7 +97,7 @@ export default function SearchResultsScreen({ route, navigation }: Props) {
     return (
       <View style={containerStyle}>
         {routeTitle}
-        <ActivityIndicator size="large" color={theme.colors.text} accessibilityLabel="Loading flights" />
+        <ActivityIndicator size="large" color={theme.colors.text} accessibilityLabel={searchResultsLabels.loading} />
       </View>
     )
   }
@@ -114,7 +115,7 @@ export default function SearchResultsScreen({ route, navigation }: Props) {
             }}
             style={{ padding: spacing.lg }}
           >
-            <Text style={[typography.label, { color: theme.colors.text }]}>Retry</Text>
+            <Text style={[typography.label, { color: theme.colors.text }]}>{commonLabels.retry}</Text>
           </Pressable>
         </View>
       </View>
@@ -125,13 +126,13 @@ export default function SearchResultsScreen({ route, navigation }: Props) {
 
   if (results) {
     sections.push({
-      title: `Outbound · ${originCode} → ${destinationCode} · ${formatDate(departureDate)}`,
+      title: `${searchResultsLabels.outbound} · ${originCode} → ${destinationCode} · ${formatDate(departureDate)}`,
       data: results.outboundFlights,
     })
 
     if (returnDate) {
       sections.push({
-        title: `Return · ${destinationCode} → ${originCode} · ${formatDate(returnDate)}`,
+        title: `${searchResultsLabels.return} · ${destinationCode} → ${originCode} · ${formatDate(returnDate)}`,
         data: results.returnFlights,
       })
     }
@@ -156,7 +157,7 @@ export default function SearchResultsScreen({ route, navigation }: Props) {
           <Text style={[typography.body, { color: theme.colors.textMuted }]}>
             {returnDate
               ? `${formatDate(departureDate)} – ${formatDate(returnDate)}`
-              : `${formatDate(departureDate)} · One way`}
+              : `${formatDate(departureDate)} · ${commonLabels.oneWay}`}
           </Text>
         }
         renderSectionHeader={({ section }) => (
@@ -168,9 +169,7 @@ export default function SearchResultsScreen({ route, navigation }: Props) {
           if (section.data.length > 0) return null
 
           return (
-            <Text style={[typography.body, { color: theme.colors.textMuted }]}>
-              No flights on this date. Try a different date.
-            </Text>
+            <Text style={[typography.body, { color: theme.colors.textMuted }]}>{searchResultsLabels.noFlights}</Text>
           )
         }}
         renderItem={({ item }) => {

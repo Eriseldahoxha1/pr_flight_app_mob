@@ -4,12 +4,7 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import { useAppTheme } from '../hooks/useAppTheme'
 import { radii, sizes, spacing, typography } from '../theme/tokens'
 import { formatDate } from '../utils/formatDate'
-
-const statusLabels = {
-  'on-time': 'On time',
-  delayed: 'Delayed',
-  cancelled: 'Cancelled',
-}
+import { flightLabels, flightStatusLabels } from '../constants/labels'
 
 type FlightCardProps = {
   flight: Flight
@@ -27,6 +22,8 @@ export default function FlightCard({
   onToggleFavorite,
 }: FlightCardProps) {
   const theme = useAppTheme()
+  let favoriteColor = isFavorite ? theme.colors.primary : theme.colors.textMuted
+  if (isFavoriteDisabled) favoriteColor = theme.colors.onDisabled
 
   const durationMinutes = Math.round((Date.parse(flight.arrivalAt) - Date.parse(flight.departureAt)) / 60000)
   const duration = `${Math.floor(durationMinutes / 60)}h ${durationMinutes % 60}m`
@@ -36,7 +33,7 @@ export default function FlightCard({
       <Pressable
         onPress={onPress}
         accessibilityRole="button"
-        accessibilityLabel={`View details for ${flight.airline} ${flight.flightNumber}`}
+        accessibilityLabel={flightLabels.viewDetailsA11y(flight.airline, flight.flightNumber)}
         style={({ pressed }) => [
           styles.card,
           {
@@ -91,7 +88,7 @@ export default function FlightCard({
                   },
                 ]}
               >
-                {statusLabels[flight.status]}
+                {flightStatusLabels[flight.status]}
               </Text>
             </View>
 
@@ -105,16 +102,16 @@ export default function FlightCard({
         accessibilityRole="button"
         accessibilityState={{ disabled: isFavoriteDisabled }}
         accessibilityLabel={
-          isFavorite ? `Remove ${flight.flightNumber} from favorites` : `Add ${flight.flightNumber} to favorites`
+          isFavorite
+            ? flightLabels.removeFavoriteA11y(flight.flightNumber)
+            : flightLabels.addFavoriteA11y(flight.flightNumber)
         }
         style={({ pressed }) => [styles.favoriteButton, pressed && { backgroundColor: theme.colors.surfaceMuted }]}
       >
         <Ionicons
           name={isFavorite ? 'heart' : 'heart-outline'}
           size={sizes.icon}
-          color={
-            isFavoriteDisabled ? theme.colors.onDisabled : isFavorite ? theme.colors.primary : theme.colors.textMuted
-          }
+          color={favoriteColor}
           accessible={false}
         />
       </Pressable>

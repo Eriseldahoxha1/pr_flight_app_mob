@@ -10,6 +10,7 @@ import { useToggleFavorite } from '../hooks/useToggleFavorite'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { loadFavorites, selectAreFavoritesReady, selectIsLoadingFavorites } from '../store/favoritesSlice'
 import { sizes, spacing, typography } from '../theme/tokens'
+import { commonLabels, favoritesLabels } from '../constants/labels'
 
 type Props = NativeStackScreenProps<FavoritesStackParamList, 'FavoriteFlightsList'>
 
@@ -40,7 +41,7 @@ export default function FavoriteFlightsScreen({ navigation }: Props) {
         const result = await FlightService.getFlightsByIds(favorites.map(favorite => favorite.flightId))
         if (!cancelled) setFlights(result)
       } catch {
-        if (!cancelled) setFlightsError('Could not load favorite flights. Please retry.')
+        if (!cancelled) setFlightsError(favoritesLabels.loadError)
       } finally {
         if (!cancelled) setIsLoadingFlights(false)
       }
@@ -64,7 +65,7 @@ export default function FavoriteFlightsScreen({ navigation }: Props) {
   if ((isLoadingFavorites || isLoadingFlights) && favoriteFlights.length === 0) {
     return (
       <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-        <ActivityIndicator size="large" color={theme.colors.text} accessibilityLabel="Loading favorite flights" />
+        <ActivityIndicator size="large" color={theme.colors.text} accessibilityLabel={favoritesLabels.loading} />
       </View>
     )
   }
@@ -74,7 +75,7 @@ export default function FavoriteFlightsScreen({ navigation }: Props) {
       <View style={[styles.container, styles.feedback, { backgroundColor: theme.colors.background }]}>
         <Text style={[typography.body, { color: theme.colors.error }]}>{error}</Text>
         <Pressable accessibilityRole="button" onPress={onRetry} style={styles.retryButton}>
-          <Text style={[typography.label, { color: theme.colors.text }]}>Retry</Text>
+          <Text style={[typography.label, { color: theme.colors.text }]}>{commonLabels.retry}</Text>
         </Pressable>
       </View>
     )
@@ -96,10 +97,8 @@ export default function FavoriteFlightsScreen({ navigation }: Props) {
       )}
       ListEmptyComponent={
         <View style={styles.feedback}>
-          <Text style={[typography.subtitle, { color: theme.colors.text }]}>No favorite flights yet</Text>
-          <Text style={[typography.body, { color: theme.colors.textMuted }]}>
-            Tap the heart on a flight to save it here.
-          </Text>
+          <Text style={[typography.subtitle, { color: theme.colors.text }]}>{favoritesLabels.emptyTitle}</Text>
+          <Text style={[typography.body, { color: theme.colors.textMuted }]}>{favoritesLabels.emptyDescription}</Text>
         </View>
       }
     />

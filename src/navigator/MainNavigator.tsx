@@ -1,4 +1,3 @@
-import { PrivateGuard } from '../guards/PrivateGuard'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { useAppTheme } from '../hooks/useAppTheme'
 import { typography } from '../theme/tokens'
@@ -11,6 +10,7 @@ import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { selectUserId } from '../store/authSlice'
 import { loadFavorites } from '../store/favoritesSlice'
 import FavoritesNavigator from './FavoritesNavigator'
+import { navigationLabels } from '../constants/labels'
 
 const tabIcons = {
   Home: { active: 'home', inactive: 'home-outline' },
@@ -39,36 +39,42 @@ export default function MainNavigator() {
   }, [dispatch, userId])
 
   return (
-    <PrivateGuard>
-      <Tab.Navigator
-        screenOptions={({ route }) => ({
-          headerShown: true,
-          headerTitleAlign: 'center',
-          headerTitleStyle: typography.subtitle,
-          headerShadowVisible: false,
-          headerStyle: { backgroundColor: theme.colors.header },
-          headerTintColor: theme.colors.onHeader,
-          tabBarActiveTintColor: theme.colors.tabActive,
-          tabBarInactiveTintColor: theme.colors.tabInactive,
-          tabBarStyle: {
-            backgroundColor: theme.colors.surface,
-            borderTopColor: theme.colors.border,
-          },
-          tabBarLabelStyle: typography.caption,
-          tabBarIcon: ({ focused, color, size }) => (
-            <Ionicons name={tabIcons[route.name][focused ? 'active' : 'inactive']} size={size} color={color} />
-          ),
-        })}
-      >
-        <Tab.Screen name="Home" component={HomeNavigator} options={{ headerShown: false }} />
-        <Tab.Screen
-          name="FavoriteFlights"
-          component={FavoritesNavigator}
-          options={{ title: 'Favorite Flights', headerShown: false }}
-        />
-        <Tab.Screen name="Profile" component={ProfileScreen} />
-        <Tab.Screen name="More" component={MoreNavigator} options={{ headerShown: false }} />
-      </Tab.Navigator>
-    </PrivateGuard>
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        headerShown: true,
+        headerTitleAlign: 'center',
+        headerTitleStyle: typography.subtitle,
+        headerShadowVisible: false,
+        headerStyle: { backgroundColor: theme.colors.header },
+        headerTintColor: theme.colors.onHeader,
+        tabBarActiveTintColor: theme.colors.tabActive,
+        tabBarInactiveTintColor: theme.colors.tabInactive,
+        tabBarStyle: {
+          backgroundColor: theme.colors.surface,
+          borderTopColor: theme.colors.border,
+        },
+        tabBarLabelStyle: typography.caption,
+        tabBarIcon: ({ focused, color, size }) => (
+          <Ionicons name={tabIcons[route.name][focused ? 'active' : 'inactive']} size={size} color={color} />
+        ),
+      })}
+    >
+      <Tab.Screen
+        name="Home"
+        component={HomeNavigator}
+        options={{ title: navigationLabels.home, headerShown: false }}
+      />
+      <Tab.Screen
+        name="FavoriteFlights"
+        component={FavoritesNavigator}
+        options={{ title: navigationLabels.favoriteFlights, headerShown: false }}
+      />
+      <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: navigationLabels.profile }} />
+      <Tab.Screen
+        name="More"
+        component={MoreNavigator}
+        options={{ title: navigationLabels.more, headerShown: false }}
+      />
+    </Tab.Navigator>
   )
 }

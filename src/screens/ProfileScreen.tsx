@@ -5,17 +5,18 @@ import { useAppDispatch, useAppSelector } from '../store/hooks'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { setThemePreference } from '../store/themeSlice'
 import { useState } from 'react'
-import { deleteItemAsync } from 'expo-secure-store'
-import { logout, selectUser } from '../store/authSlice'
+import { selectUser } from '../store/authSlice'
+import { logoutUser } from '../store/authThunks'
 import Toast from 'react-native-toast-message'
 import ThemeService from '../services/ThemeService'
 import type { ThemePreference } from '../types/theme'
 import ConfirmDialog from '../components/ConfirmDialog'
+import { commonLabels, profileLabels, themeLabels } from '../constants/labels'
 
 const themeOptions: { value: ThemePreference; label: string }[] = [
-  { value: 'system', label: 'System' },
-  { value: 'light', label: 'Light' },
-  { value: 'dark', label: 'Dark' },
+  { value: 'system', label: themeLabels.system },
+  { value: 'light', label: themeLabels.light },
+  { value: 'dark', label: themeLabels.dark },
 ]
 
 export default function ProfileScreen() {
@@ -40,14 +41,13 @@ export default function ProfileScreen() {
     setIsLoggingOut(true)
 
     try {
-      await deleteItemAsync('session')
-      dispatch(logout())
+      await dispatch(logoutUser()).unwrap()
     } catch {
       setIsLogoutDialogVisible(false)
       Toast.show({
         type: 'error',
-        text1: 'Could not log out',
-        text2: 'Please try again.',
+        text1: profileLabels.logOutError,
+        text2: commonLabels.tryAgain,
       })
     } finally {
       setIsLoggingOut(false)
@@ -59,8 +59,8 @@ export default function ProfileScreen() {
     ThemeService.savePreference(preference).catch(() => {
       Toast.show({
         type: 'error',
-        text1: 'Could not save your theme choice',
-        text2: 'It applies now, but will reset when the app restarts.',
+        text1: profileLabels.themeSaveError,
+        text2: profileLabels.themeSaveErrorDetail,
       })
     })
   }
@@ -77,13 +77,13 @@ export default function ProfileScreen() {
       <View style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
         <View style={styles.row}>
           <Ionicons name="person-outline" size={sizes.icon} color={theme.colors.text} accessible={false} />
-          <Text style={[typography.body, { color: theme.colors.text }]}>Name</Text>
+          <Text style={[typography.body, { color: theme.colors.text }]}>{profileLabels.name}</Text>
           <Text style={[typography.body, styles.value, { color: theme.colors.textMuted }]}>{user.name}</Text>
         </View>
         <View style={[styles.divider, { backgroundColor: theme.colors.border }]} />
         <View style={styles.row}>
           <Ionicons name="mail-outline" size={sizes.icon} color={theme.colors.text} accessible={false} />
-          <Text style={[typography.body, { color: theme.colors.text }]}>Email</Text>
+          <Text style={[typography.body, { color: theme.colors.text }]}>{profileLabels.email}</Text>
           <Text selectable style={[typography.body, styles.value, { color: theme.colors.textMuted }]}>
             {user.email}
           </Text>
@@ -101,12 +101,12 @@ export default function ProfileScreen() {
         <View style={styles.themeSetting}>
           <View style={styles.themeHeader}>
             <Ionicons name="moon-outline" size={sizes.icon} color={theme.colors.text} accessible={false} />
-            <Text style={[typography.body, { color: theme.colors.text }]}>Appearance</Text>
+            <Text style={[typography.body, { color: theme.colors.text }]}>{profileLabels.appearance}</Text>
           </View>
 
           <View
             accessibilityRole="radiogroup"
-            accessibilityLabel="Appearance"
+            accessibilityLabel={profileLabels.appearance}
             style={[styles.segmented, { backgroundColor: theme.colors.surfaceMuted }]}
           >
             {themeOptions.map(option => {
@@ -142,14 +142,14 @@ export default function ProfileScreen() {
         ]}
       >
         <Ionicons name="log-out-outline" size={sizes.icon} color={theme.colors.text} accessible={false} />
-        <Text style={[typography.body, { color: theme.colors.text }]}>Log out</Text>
+        <Text style={[typography.body, { color: theme.colors.text }]}>{profileLabels.logOut}</Text>
       </Pressable>
 
       <ConfirmDialog
         visible={isLogoutDialogVisible}
-        title="Log out?"
-        confirmLabel="Log out"
-        confirmingLabel="Logging out…"
+        title={profileLabels.logOutConfirm}
+        confirmLabel={profileLabels.logOut}
+        confirmingLabel={profileLabels.loggingOut}
         isConfirming={isLoggingOut}
         onConfirm={handleLogout}
         onCancel={() => setIsLogoutDialogVisible(false)}

@@ -1,6 +1,7 @@
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native'
 import { useAppTheme } from '../hooks/useAppTheme'
 import { radii, sizes, spacing, typography } from '../theme/tokens'
+import { commonLabels } from '../constants/labels'
 
 type ConfirmDialogProps = {
   visible: boolean
@@ -56,7 +57,7 @@ export default function ConfirmDialog({
                 pressed && { backgroundColor: theme.colors.surfaceMuted },
               ]}
             >
-              <Text style={[typography.label, { color: theme.colors.text }]}>Cancel</Text>
+              <Text style={[typography.label, { color: theme.colors.text }]}>{commonLabels.cancel}</Text>
             </Pressable>
 
             <View style={styles.action}>

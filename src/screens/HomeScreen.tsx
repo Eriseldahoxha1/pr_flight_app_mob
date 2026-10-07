@@ -1,6 +1,7 @@
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View, Pressable } from 'react-native'
 import { useAppTheme } from '../hooks/useAppTheme'
 import { radii, sizes, spacing, typography } from '../theme/tokens'
+import { homeLabels } from '../constants/labels'
 import { useEffect, useRef, useState } from 'react'
 import AirportService from '../services/AirportService'
 import type { Airport } from '../types/airport'
@@ -18,6 +19,7 @@ import { selectUserId } from '../store/authSlice'
 import { loadRecentSearches, saveRecentSearch } from '../store/recentSearchesSlice'
 import Toast from 'react-native-toast-message'
 import { formatDate } from '../utils/formatDate'
+import { getToday } from '../utils/getToday'
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'Dashboard'>
 
@@ -60,7 +62,7 @@ export default function HomeScreen({ navigation }: Props) {
       const airports = await AirportService.getAirports()
       setAirports(airports)
     } catch {
-      setAirportsError('Could not load airports. Please try again.')
+      setAirportsError(homeLabels.airportsError)
     } finally {
       setIsLoadingAirports(false)
     }
@@ -95,31 +97,24 @@ export default function HomeScreen({ navigation }: Props) {
   }
 
   const airportFields = [
-    { field: 'origin', label: 'Origin', airport: origin },
-    { field: 'destination', label: 'Destination', airport: destination },
+    { field: 'origin', label: homeLabels.origin, airport: origin },
+    { field: 'destination', label: homeLabels.destination, airport: destination },
   ] as const
 
   const dateFields = [
-    { field: 'departure', label: 'Departure Date', date: departureDate, placeholder: 'Choose date' },
-    { field: 'return', label: 'Return Date', date: returnDate, placeholder: 'One way (optional)' },
+    { field: 'departure', label: homeLabels.departureDate, date: departureDate, placeholder: homeLabels.chooseDate },
+    { field: 'return', label: homeLabels.returnDate, date: returnDate, placeholder: homeLabels.returnPlaceholder },
   ] as const
 
   const airportErrors = validateAirports(origin?.code, destination?.code)
   const areAirportsValid = !airportErrors.origin && !airportErrors.destination && !airportErrors.route
 
-  const dateErrors = validateFlightDates(departureDate, returnDate)
+  const today = getToday()
+  const dateErrors = validateFlightDates(departureDate, returnDate, today)
   const areDatesValid = !dateErrors.departure && !dateErrors.range
   const handleSearch = () => {
     setHasSubmitted(true)
-    if (
-      !areAirportsValid ||
-      !areDatesValid ||
-      !origin ||
-      !destination ||
-      !departureDate ||
-      isSavingSearch
-    )
-      return
+    if (!areAirportsValid || !areDatesValid || !origin || !destination || !departureDate || isSavingSearch) return
 
     const criteria: FlightSearchCriteria = {
       originCode: origin.code,
@@ -154,8 +149,8 @@ export default function HomeScreen({ navigation }: Props) {
       if (isActive.current) {
         Toast.show({
           type: 'error',
-          text1: 'Could not restore this search',
-          text2: 'Check your connection and airport availability, then try again.',
+          text1: homeLabels.restoreSearchError,
+          text2: homeLabels.restoreSearchErrorDetail,
         })
       }
     } finally {
@@ -178,7 +173,7 @@ export default function HomeScreen({ navigation }: Props) {
 
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel={`${label}: ${airport ? `${airport.code}, ${airport.city}` : 'Choose airport'}`}
+                  accessibilityLabel={`${label}: ${airport ? `${airport.code}, ${airport.city}` : homeLabels.chooseAirport}`}
                   onPress={() => openAirportPicker(field)}
                   style={({ pressed }) => [
                     styles.airportInput,
@@ -199,7 +194,7 @@ export default function HomeScreen({ navigation }: Props) {
                       },
                     ]}
                   >
-                    {airport ? `${airport.code} · ${airport.city}` : 'Choose airport'}
+                    {airport ? `${airport.code} · ${airport.city}` : homeLabels.chooseAirport}
                   </Text>
 
                   <Ionicons
@@ -266,12 +261,17 @@ export default function HomeScreen({ navigation }: Props) {
                   {canClear && (
                     <Pressable
                       accessibilityRole="button"
-                      accessibilityLabel="Clear return date"
+                      accessibilityLabel={homeLabels.clearReturnDate}
                       onPress={() => setReturnDate(null)}
                       hitSlop={spacing.sm}
                       style={styles.clearDate}
                     >
-                      <Ionicons name="close-circle" size={sizes.icon} color={theme.colors.textMuted} accessible={false} />
+                      <Ionicons
+                        name="close-circle"
+                        size={sizes.icon}
+                        color={theme.colors.textMuted}
+                        accessible={false}
+                      />
                     </Pressable>
                   )}
                 </View>
@@ -288,29 +288,26 @@ export default function HomeScreen({ navigation }: Props) {
             accessibilityState={{ disabled: isSavingSearch || isRefilling, busy: isSavingSearch }}
             style={({ pressed }) => [
               styles.searchButton,
-              {
-                backgroundColor: isSavingSearch
-                  ? theme.colors.disabled
-                  : pressed
-                    ? theme.colors.primaryPressed
-                    : theme.colors.primary,
-              },
+              { backgroundColor: theme.colors.primary },
+              pressed && { backgroundColor: theme.colors.primaryPressed },
+              isSavingSearch && { backgroundColor: theme.colors.disabled },
             ]}
           >
             <Text
               style={[typography.button, { color: isSavingSearch ? theme.colors.onDisabled : theme.colors.onPrimary }]}
             >
-              {isSavingSearch ? 'Saving search…' : 'Search flights'}
+              {isSavingSearch ? homeLabels.savingSearch : homeLabels.searchFlights}
             </Text>
           </Pressable>
         </View>
-        {history.loadRequestId ? (
+        {Boolean(history.loadRequestId) && (
           <ActivityIndicator
             style={styles.historyFeedback}
             color={theme.colors.text}
-            accessibilityLabel="Loading recent searches"
+            accessibilityLabel={homeLabels.loadingRecentSearches}
           />
-        ) : (
+        )}
+        {!history.loadRequestId && (
           <>
             {history.error && (
               <View style={styles.historyFeedback}>
@@ -322,7 +319,7 @@ export default function HomeScreen({ navigation }: Props) {
                   }}
                   style={styles.retryButton}
                 >
-                  <Text style={[typography.label, { color: theme.colors.text }]}>Reload history</Text>
+                  <Text style={[typography.label, { color: theme.colors.text }]}>{homeLabels.reloadHistory}</Text>
                 </Pressable>
               </View>
             )}
@@ -336,14 +333,16 @@ export default function HomeScreen({ navigation }: Props) {
                 />
               </View>
             )}
-            {isRefilling && <ActivityIndicator color={theme.colors.text} accessibilityLabel="Restoring search" />}
+            {isRefilling && (
+              <ActivityIndicator color={theme.colors.text} accessibilityLabel={homeLabels.restoringSearch} />
+            )}
           </>
         )}
       </ScrollView>
 
       <AirportPicker
         visible={activeAirportField !== null}
-        title={activeAirportField === 'origin' ? 'Choose origin' : 'Choose destination'}
+        title={activeAirportField === 'origin' ? homeLabels.chooseOrigin : homeLabels.chooseDestination}
         airports={airports}
         selectedAirportId={activeAirportField === 'origin' ? origin?.id : destination?.id}
         isLoading={isLoadingAirports}
@@ -358,9 +357,9 @@ export default function HomeScreen({ navigation }: Props) {
       <DatePicker
         key={activeDateField ?? 'closed'}
         visible={activeDateField !== null}
-        title={activeDateField === 'departure' ? 'Choose departure date' : 'Choose return date'}
+        title={activeDateField === 'departure' ? homeLabels.chooseDepartureDate : homeLabels.chooseReturnDate}
         value={activeDateField === 'departure' ? departureDate : returnDate}
-        minDate={activeDateField === 'return' ? (departureDate ?? undefined) : undefined}
+        minDate={activeDateField === 'return' && departureDate && departureDate > today ? departureDate : today}
         onConfirm={confirmDate}
         onClose={() => setActiveDateField(null)}
       />

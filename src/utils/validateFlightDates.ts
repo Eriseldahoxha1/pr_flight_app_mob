@@ -1,8 +1,18 @@
-export const validateFlightDates = (departureDate: string | null, returnDate: string | null) => {
+import { validationLabels } from '../constants/labels'
+import { getToday } from './getToday'
+
+const getDepartureError = (departureDate: string | null, today: string) => {
+  if (!departureDate) return validationLabels.departureRequired
+  if (departureDate < today) return validationLabels.departureInPast
+
+  return null
+}
+
+export const validateFlightDates = (departureDate: string | null, returnDate: string | null, today = getToday()) => {
   const invalidOrder = Boolean(departureDate && returnDate && returnDate < departureDate)
 
   return {
-    departure: !departureDate ? 'Choose a departure date.' : null,
-    range: invalidOrder ? 'Return date cannot be before departure.' : null,
+    departure: getDepartureError(departureDate, today),
+    range: invalidOrder ? validationLabels.returnBeforeDeparture : null,
   }
 }

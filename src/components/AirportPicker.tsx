@@ -3,7 +3,6 @@ import {
   Pressable,
   StyleSheet,
   Text,
-  TextInput,
   View,
   FlatList,
   Keyboard,
@@ -12,8 +11,11 @@ import {
   ActivityIndicator,
 } from 'react-native'
 import { radii, sizes, spacing, typography } from '../theme/tokens'
+import { airportPickerLabels, commonLabels } from '../constants/labels'
 import { Airport } from '../types/airport'
 import { useAppTheme } from '../hooks/useAppTheme'
+import { useDebouncedValue } from '../hooks/useDebouncedValue'
+import SearchInput from './SearchInput'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useState } from 'react'
@@ -45,11 +47,37 @@ export default function AirportPicker({
   const insets = useSafeAreaInsets()
 
   const [search, setSearch] = useState('')
-  const query = search.trim().toLowerCase()
+  const debouncedSearch = useDebouncedValue(search)
+  const query = debouncedSearch.trim().toLowerCase()
 
   const filteredAirports = airports.filter(airport =>
     [airport.name, airport.code, airport.city, airport.country].some(value => value.toLowerCase().includes(query)),
   )
+
+  const renderEmptyContent = () => {
+    if (isLoading) {
+      return (
+        <ActivityIndicator size="large" color={theme.colors.text} accessibilityLabel={airportPickerLabels.loading} />
+      )
+    }
+
+    if (error) {
+      return (
+        <>
+          <Text style={[typography.body, { color: theme.colors.error }]}>{error}</Text>
+          <Pressable accessibilityRole="button" onPress={onRetry} style={styles.retryButton}>
+            <Text style={[typography.label, { color: theme.colors.text }]}>{commonLabels.retry}</Text>
+          </Pressable>
+        </>
+      )
+    }
+
+    return (
+      <Text style={[typography.body, { color: theme.colors.textMuted }]}>
+        {airports.length === 0 ? airportPickerLabels.noAirports : airportPickerLabels.noMatches}
+      </Text>
+    )
+  }
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose} onShow={() => setSearch('')}>
@@ -85,52 +113,21 @@ export default function AirportPicker({
               <Pressable
                 onPress={onClose}
                 accessibilityRole="button"
-                accessibilityLabel="Close airport picker"
+                accessibilityLabel={airportPickerLabels.close}
                 style={styles.closeButton}
               >
                 <Ionicons name="close" size={sizes.icon} color={theme.colors.text} />
               </Pressable>
             </View>
-            <View
-              style={[
-                styles.searchContainer,
-                {
-                  backgroundColor: theme.colors.surface,
-                  borderColor: theme.colors.inputBorder,
-                },
-              ]}
-            >
-              <Ionicons
-                name="search-outline"
-                size={sizes.iconSmall}
-                color={theme.colors.textMuted}
-                accessible={false}
-              />
-
-              <TextInput
-                keyboardAppearance={theme.dark ? 'dark' : 'light'}
-                value={search}
-                onChangeText={setSearch}
-                placeholder="Search airports or cities"
-                placeholderTextColor={theme.colors.placeholder}
-                accessibilityLabel="Search airports"
-                autoCapitalize="none"
-                autoCorrect={false}
-                editable={!isLoading && !error}
-                style={[typography.input, styles.searchInput, { color: theme.colors.text }]}
-              />
-
-              {search.length > 0 && (
-                <Pressable
-                  onPress={() => setSearch('')}
-                  accessibilityRole="button"
-                  accessibilityLabel="Clear search"
-                  style={styles.closeButton}
-                >
-                  <Ionicons name="close-circle" size={sizes.iconSmall} color={theme.colors.textMuted} />
-                </Pressable>
-              )}
-            </View>
+            <SearchInput
+              value={search}
+              onChangeText={setSearch}
+              placeholder={airportPickerLabels.searchPlaceholder}
+              accessibilityLabel={airportPickerLabels.search}
+              clearLabel={airportPickerLabels.clearSearch}
+              editable={!isLoading && !error}
+              style={styles.search}
+            />
             <FlatList
               style={{ flex: 1 }}
               data={filteredAirports}
@@ -141,27 +138,7 @@ export default function AirportPicker({
               keyboardDismissMode="on-drag"
               showsVerticalScrollIndicator={false}
 
-              ListEmptyComponent={
-                <View style={styles.feedback}>
-                  {isLoading ? (
-                    <ActivityIndicator size="large" color={theme.colors.text} accessibilityLabel="Loading airports" />
-                  ) : error ? (
-                    <>
-                      <Text style={[typography.body, { color: theme.colors.error }]}>{error}</Text>
-
-                      <Pressable accessibilityRole="button" onPress={onRetry} style={styles.retryButton}>
-                        <Text style={[typography.label, { color: theme.colors.text }]}>Retry</Text>
-                      </Pressable>
-                    </>
-                  ) : (
-                    <Text style={[typography.body, { color: theme.colors.textMuted }]}>
-                      {airports.length === 0
-                        ? 'No airports are available.'
-                        : 'No matches. Try another city or airport code.'}
-                    </Text>
-                  )}
-                </View>
-              }
+              ListEmptyComponent={<View style={styles.feedback}>{renderEmptyContent()}</View>}
               renderItem={({ item }) => {
                 const selected = item.id === selectedAirportId
 
@@ -239,19 +216,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    borderWidth: sizes.borderWidth,
-    borderRadius: radii.md,
-    paddingHorizontal: spacing.md,
+  search: {
     marginBottom: spacing.lg,
-  },
-  searchInput: {
-    flex: 1,
-    minHeight: sizes.inputMinHeight,
-    paddingVertical: spacing.md,
   },
   airportRow: {
     flexDirection: 'row',

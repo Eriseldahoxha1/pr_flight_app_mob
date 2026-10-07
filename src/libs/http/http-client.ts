@@ -1,6 +1,6 @@
 import { AxiosError, AxiosResponse, create } from 'axios'
 import type { AxiosRequestConfig } from 'axios'
-import { deleteItemAsync } from 'expo-secure-store'
+import SessionService from '../../services/SessionService'
 import type { AppStore } from '../../store'
 import { logout } from '../../store/authSlice'
 
@@ -47,7 +47,7 @@ instance.interceptors.response.use(
     if (error.response?.status === 401 && token && authorization === `Bearer ${token}`) {
       // Concurrent failures share cleanup; stale requests cannot clear a newer session.
       if (!invalidatingSession) {
-        invalidatingSession = deleteItemAsync('session')
+        invalidatingSession = SessionService.clear()
           .catch(() => {
             console.warn('Could not remove the saved session')
           })

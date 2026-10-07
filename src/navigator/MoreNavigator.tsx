@@ -1,3 +1,4 @@
+import AppHeader from '../components/AppHeader'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { MoreStackParamList } from '../types/navigation'
 import { useAppTheme } from '../hooks/useAppTheme'
@@ -5,9 +6,8 @@ import SettingsScreen from '../screens/SettingsScreen'
 import MoreScreen from '../screens/MoreScreen'
 import AboutScreen from '../screens/AboutScreen'
 import ContactScreen from '../screens/ContactScreen'
-import { typography } from '../theme/tokens'
-import { Header, getHeaderTitle } from '@react-navigation/elements'
 import HelpScreen from '../screens/HelpScreen'
+import { navigationLabels } from '../constants/labels'
 
 const Stack = createNativeStackNavigator<MoreStackParamList>()
 
@@ -17,30 +17,17 @@ export default function MoreNavigator() {
   return (
     <Stack.Navigator
       screenOptions={{
-        header: ({ options, route, back }) => (
-          <Header
-            title={getHeaderTitle(options, route.name)}
-            back={back}
-            headerTitleAlign="center"
-            headerTitleStyle={typography.subtitle}
-            headerStyle={{
-              backgroundColor: theme.colors.header,
-            }}
-            headerTintColor={theme.colors.onHeader}
-            headerShadowVisible={false}
-            headerBackButtonDisplayMode="minimal"
-          />
-        ),
+        header: props => <AppHeader {...props} />,
         contentStyle: {
           backgroundColor: theme.colors.background,
         },
       }}
     >
-      <Stack.Screen name="MoreMenu" component={MoreScreen} options={{ title: 'More' }} />
-      <Stack.Screen name="Settings" component={SettingsScreen} />
-      <Stack.Screen name="Help" component={HelpScreen} />
-      <Stack.Screen name="About" component={AboutScreen} />
-      <Stack.Screen name="Contact" component={ContactScreen} />
+      <Stack.Screen name="MoreMenu" component={MoreScreen} options={{ title: navigationLabels.more }} />
+      <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: navigationLabels.settings }} />
+      <Stack.Screen name="Help" component={HelpScreen} options={{ title: navigationLabels.help }} />
+      <Stack.Screen name="About" component={AboutScreen} options={{ title: navigationLabels.about }} />
+      <Stack.Screen name="Contact" component={ContactScreen} options={{ title: navigationLabels.contact }} />
     </Stack.Navigator>
   )
 }

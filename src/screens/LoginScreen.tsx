@@ -12,26 +12,22 @@ import {
   Image,
   Platform,
 } from 'react-native'
-import { isAxiosError } from 'axios'
-import AuthService from '../services/AuthService'
-import { validateEmail, validatePassword } from '../utils/validation'
+import { validateEmail, validatePassword } from '../utils/validateLogin'
 import { useAppDispatch } from '../store/hooks'
-import { setSession } from '../store/authSlice'
-import { setItemAsync } from 'expo-secure-store'
+import { loginUser } from '../store/authThunks'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useAppTheme } from '../hooks/useAppTheme'
 import { AppTheme } from '../theme/themes'
 import { radii, sizes, spacing, typography } from '../theme/tokens'
+import { authLabels } from '../constants/labels'
 
 const getLoginErrorMessage = (error: unknown) => {
-  if (isAxiosError(error)) {
-    if (!error.response) return "Can't reach the server. Check your connection and try again."
-    if (error.response.status === 400 || error.response.status === 401) return 'Incorrect email or password.'
-  }
+  if (error === 'network') return authLabels.networkError
+  if (error === 'invalid-credentials') return authLabels.invalidCredentials
 
-  return 'Something went wrong. Please try again.'
+  return authLabels.unknownError
 }
 
 const LoginScreen = () => {
@@ -72,9 +68,7 @@ const LoginScreen = () => {
     setIsLoading(true)
 
     try {
-      const { accessToken, user } = await AuthService.login({ email: normalizedEmail, password })
-      await setItemAsync('session', JSON.stringify({ accessToken, userId: user.id }))
-      dispatch(setSession({ accessToken, user }))
+      await dispatch(loginUser({ email: normalizedEmail, password })).unwrap()
     } catch (error) {
       setLoginError(getLoginErrorMessage(error))
     } finally {
@@ -103,16 +97,16 @@ const LoginScreen = () => {
             />
           </View>
           <View style={[styles.form, { paddingBottom: insets.bottom + spacing.xxl }]}>
-            <Text style={styles.title}>Welcome aboard</Text>
-            <Text style={styles.subtitle}>Log in to manage your next journey.</Text>
+            <Text style={styles.title}>{authLabels.title}</Text>
+            <Text style={styles.subtitle}>{authLabels.subtitle}</Text>
 
             <View style={styles.field}>
-              <Text style={styles.label}>Email address</Text>
+              <Text style={styles.label}>{authLabels.email}</Text>
               <TextInput
                 style={[styles.input, emailError ? styles.inputInvalid : null]}
                 value={email}
                 onChangeText={changeEmail}
-                placeholder="you@example.com"
+                placeholder={authLabels.emailPlaceholder}
                 placeholderTextColor={theme.colors.placeholder}
                 keyboardType="email-address"
                 textContentType="username"
@@ -122,7 +116,7 @@ const LoginScreen = () => {
                 returnKeyType="next"
                 submitBehavior="submit"
                 onSubmitEditing={() => passwordInput.current?.focus()}
-                accessibilityLabel="Email address"
+                accessibilityLabel={authLabels.email}
                 accessibilityHint={emailError || undefined}
                 editable={!isLoading}
               />
@@ -130,14 +124,14 @@ const LoginScreen = () => {
             </View>
 
             <View style={styles.field}>
-              <Text style={styles.label}>Password</Text>
+              <Text style={styles.label}>{authLabels.password}</Text>
               <View>
                 <TextInput
                   ref={passwordInput}
                   style={[styles.input, styles.passwordInput, passwordError ? styles.inputInvalid : null]}
                   value={password}
                   onChangeText={changePassword}
-                  placeholder="Enter your password"
+                  placeholder={authLabels.passwordPlaceholder}
                   placeholderTextColor={theme.colors.placeholder}
                   secureTextEntry={!isPasswordVisible}
                   textContentType="password"
@@ -146,13 +140,13 @@ const LoginScreen = () => {
                   autoComplete="current-password"
                   returnKeyType="go"
                   onSubmitEditing={() => void handleLogin()}
-                  accessibilityLabel="Password"
+                  accessibilityLabel={authLabels.password}
                   accessibilityHint={passwordError || undefined}
                   editable={!isLoading}
                 />
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel={isPasswordVisible ? 'Hide password' : 'Show password'}
+                  accessibilityLabel={isPasswordVisible ? authLabels.hidePassword : authLabels.showPassword}
                   onPress={() => setIsPasswordVisible(visible => !visible)}
                   hitSlop={spacing.sm}
                   style={styles.passwordToggle}
@@ -180,7 +174,7 @@ const LoginScreen = () => {
               ]}
             >
               {isLoading && <ActivityIndicator size="small" color={theme.colors.onPrimary} />}
-              <Text style={styles.buttonText}>{isLoading ? 'Logging in…' : 'Log in'}</Text>
+              <Text style={styles.buttonText}>{isLoading ? authLabels.loggingIn : authLabels.logIn}</Text>
             </Pressable>
 
             {loginError && (

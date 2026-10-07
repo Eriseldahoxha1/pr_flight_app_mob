@@ -1,14 +1,15 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { useEffect } from 'react'
-import { useAppDispatch } from '../store/hooks'
-import { deleteItemAsync, getItemAsync } from 'expo-secure-store'
-import { logout, setAuthInitialized, setSession } from '../store/authSlice'
-import UserService from '../services/UserService'
+import { ActivityIndicator, StyleSheet, View } from 'react-native'
+import { useAppDispatch, useAppSelector } from '../store/hooks'
+import { selectIsAuthenticated, selectIsAuthInitialized, setAuthInitialized } from '../store/authSlice'
+import { restoreSession } from '../store/authThunks'
+import { useAppTheme } from '../hooks/useAppTheme'
 import ThemeService from '../services/ThemeService'
 import { setThemePreference } from '../store/themeSlice'
-import { isAxiosError } from 'axios'
 import Toast from 'react-native-toast-message'
 import { RootStackParamList } from '../types/navigation'
+import { authLabels } from '../constants/labels'
 import AuthNavigator from './AuthNavigator'
 import MainNavigator from './MainNavigator'
 
@@ -16,82 +17,61 @@ const Stack = createNativeStackNavigator<RootStackParamList>()
 
 export default function RootNavigator() {
   const dispatch = useAppDispatch()
+  const theme = useAppTheme()
+  const isAuthenticated = useAppSelector(selectIsAuthenticated)
+  const isInitialized = useAppSelector(selectIsAuthInitialized)
 
   useEffect(() => {
     let cancelled = false
 
-    async function restoreSession() {
-      try {
-        const savedSession = await getItemAsync('session')
+    const sessionRequest = dispatch(restoreSession())
+    const sessionRestoration = sessionRequest.then(result => {
+      if (cancelled || !restoreSession.rejected.match(result) || result.meta.aborted) return
 
-        if (cancelled) return
-
-        if (!savedSession) {
-          await Promise.all([deleteItemAsync('accessToken'), deleteItemAsync('userId')])
-          return
-        }
-
-        const session: unknown = JSON.parse(savedSession)
-
-        if (
-          typeof session !== 'object' ||
-          session === null ||
-          !('accessToken' in session) ||
-          typeof session.accessToken !== 'string' ||
-          !session.accessToken.trim() ||
-          !('userId' in session) ||
-          typeof session.userId !== 'number' ||
-          !Number.isInteger(session.userId)
-        ) {
-          throw new SyntaxError('Invalid saved session')
-        }
-
-        const { accessToken, userId } = session
-        const user = await UserService.getUser(userId, accessToken)
-
-        if (!cancelled) dispatch(setSession({ accessToken, user }))
-      } catch (error) {
-        if (cancelled) return
-
-        const status = isAxiosError(error) ? error.response?.status : undefined
-        const invalidSession = error instanceof SyntaxError || status === 401 || status === 403 || status === 404
-
-        if (invalidSession) {
-          try {
-            await deleteItemAsync('session')
-          } catch {
-            console.warn('Could not remove the saved session')
-          }
-        }
-
-        if (cancelled) return
-
-        dispatch(logout())
-        Toast.show({
-          type: 'error',
-          text1: invalidSession ? 'Please log in again' : 'Could not restore your session. Reopen the app to retry.',
-        })
-      }
-    }
+      Toast.show({
+        type: 'error',
+        text1: result.payload === 'invalid-session' ? authLabels.sessionExpired : authLabels.restoreFailed,
+      })
+    })
 
     async function restoreThemePreference() {
       const preference = await ThemeService.getPreference()
       if (!cancelled) dispatch(setThemePreference(preference))
     }
 
-    void Promise.all([restoreSession(), restoreThemePreference()]).finally(() => {
+    void Promise.all([sessionRestoration, restoreThemePreference()]).finally(() => {
       if (!cancelled) dispatch(setAuthInitialized())
     })
 
     return () => {
       cancelled = true
+      sessionRequest.abort()
     }
   }, [dispatch])
 
+  if (!isInitialized) {
+    return (
+      <View style={[styles.loading, { backgroundColor: theme.colors.background }]}>
+        <ActivityIndicator size="large" color={theme.colors.text} />
+      </View>
+    )
+  }
+
   return (
-    <Stack.Navigator initialRouteName="Auth" screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Auth" component={AuthNavigator} />
-      <Stack.Screen name="Main" component={MainNavigator} />
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {isAuthenticated ? (
+        <Stack.Screen name="Main" component={MainNavigator} />
+      ) : (
+        <Stack.Screen name="Auth" component={AuthNavigator} />
+      )}
     </Stack.Navigator>
   )
 }
+
+const styles = StyleSheet.create({
+  loading: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+})

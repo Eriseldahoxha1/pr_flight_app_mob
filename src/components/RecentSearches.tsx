@@ -4,6 +4,8 @@ import { useAppTheme } from '../hooks/useAppTheme'
 import { radii, sizes, spacing, typography } from '../theme/tokens'
 import type { RecentSearch } from '../types/flight'
 import { formatDate } from '../utils/formatDate'
+import { MAX_RECENT_SEARCHES } from '../constants/general'
+import { commonLabels, recentSearchLabels } from '../constants/labels'
 
 type RecentSearchesProps = {
   searches: RecentSearch[]
@@ -17,53 +19,54 @@ export default function RecentSearches({ searches, onSelect }: RecentSearchesPro
     <View style={styles.container}>
       <View style={styles.header}>
         <Text accessibilityRole="header" style={[typography.subtitle, { color: theme.colors.text }]}>
-          Recent searches
+          {recentSearchLabels.title}
         </Text>
-        <Text style={[typography.caption, { color: theme.colors.textMuted }]}>Last 10 searches</Text>
+        <Text style={[typography.caption, { color: theme.colors.textMuted }]}>
+          {recentSearchLabels.lastSearches(MAX_RECENT_SEARCHES)}
+        </Text>
       </View>
 
-      {searches.length === 0 ? (
+      {searches.length === 0 && (
         <View style={[styles.empty, { backgroundColor: theme.colors.surfaceMuted }]}>
           <Ionicons name="document-text-outline" size={sizes.icon} color={theme.colors.textMuted} accessible={false} />
           <Text style={[typography.body, styles.emptyText, { color: theme.colors.textMuted }]}>
-            Your recent searches will appear here.
+            {recentSearchLabels.empty}
           </Text>
         </View>
-      ) : (
-        searches.slice(0, 10).map(search => {
-          const dates = search.returnDate
-            ? `${formatDate(search.departureDate)} – ${formatDate(search.returnDate)}`
-            : `${formatDate(search.departureDate)} · One way`
-
-          return (
-            <Pressable
-              key={search.id}
-              accessibilityRole="button"
-              accessibilityLabel={`Use search from ${search.originCode} to ${search.destinationCode}, ${dates}`}
-              accessibilityHint="Fills the flight search form with these airports and dates."
-              onPress={() => onSelect(search)}
-              style={({ pressed }) => [
-                styles.row,
-                {
-                  borderColor: theme.colors.border,
-                  backgroundColor: pressed ? theme.colors.surfaceMuted : theme.colors.surface,
-                },
-              ]}
-            >
-              <Ionicons name="time-outline" size={sizes.icon} color={theme.colors.text} accessible={false} />
-              <View style={styles.details}>
-                <Text style={[typography.label, { color: theme.colors.text }]}>
-                  {search.originCode} → {search.destinationCode}
-                </Text>
-                <Text style={[typography.caption, { color: theme.colors.textMuted }]}>{dates}</Text>
-              </View>
-              <View style={[styles.action, { backgroundColor: theme.colors.surfaceMuted }]}>
-                <Text style={[typography.caption, { color: theme.colors.text }]}>Use search</Text>
-              </View>
-            </Pressable>
-          )
-        })
       )}
+      {searches.slice(0, MAX_RECENT_SEARCHES).map(search => {
+        const dates = search.returnDate
+          ? `${formatDate(search.departureDate)} – ${formatDate(search.returnDate)}`
+          : `${formatDate(search.departureDate)} · ${commonLabels.oneWay}`
+
+        return (
+          <Pressable
+            key={search.id}
+            accessibilityRole="button"
+            accessibilityLabel={recentSearchLabels.useSearchA11y(search.originCode, search.destinationCode, dates)}
+            accessibilityHint={recentSearchLabels.useSearchHint}
+            onPress={() => onSelect(search)}
+            style={({ pressed }) => [
+              styles.row,
+              {
+                borderColor: theme.colors.border,
+                backgroundColor: pressed ? theme.colors.surfaceMuted : theme.colors.surface,
+              },
+            ]}
+          >
+            <Ionicons name="time-outline" size={sizes.icon} color={theme.colors.text} accessible={false} />
+            <View style={styles.details}>
+              <Text style={[typography.label, { color: theme.colors.text }]}>
+                {search.originCode} → {search.destinationCode}
+              </Text>
+              <Text style={[typography.caption, { color: theme.colors.textMuted }]}>{dates}</Text>
+            </View>
+            <View style={[styles.action, { backgroundColor: theme.colors.surfaceMuted }]}>
+              <Text style={[typography.caption, { color: theme.colors.text }]}>{recentSearchLabels.useSearch}</Text>
+            </View>
+          </Pressable>
+        )
+      })}
     </View>
   )
 }

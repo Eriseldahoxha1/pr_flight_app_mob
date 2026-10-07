@@ -4,6 +4,7 @@ import { Calendar } from 'react-native-calendars'
 import { useAppTheme } from '../hooks/useAppTheme'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { radii, sizes, spacing, typography } from '../theme/tokens'
+import { commonLabels } from '../constants/labels'
 
 type DatePickerProps = {
   visible: boolean
@@ -98,7 +99,7 @@ export default function DatePicker({ visible, title, value, minDate, onClose, on
                 },
               ]}
             >
-              <Text style={[typography.button, { color: theme.colors.text }]}>Cancel</Text>
+              <Text style={[typography.button, { color: theme.colors.text }]}>{commonLabels.cancel}</Text>
             </Pressable>
             <Pressable
               accessibilityRole="button"
@@ -107,19 +108,15 @@ export default function DatePicker({ visible, title, value, minDate, onClose, on
               onPress={handleConfirm}
               style={({ pressed }) => [
                 styles.button,
-                {
-                  backgroundColor: !canConfirm
-                    ? theme.colors.disabled
-                    : pressed
-                      ? theme.colors.primaryPressed
-                      : theme.colors.primary,
-                },
+                { backgroundColor: theme.colors.primary },
+                pressed && { backgroundColor: theme.colors.primaryPressed },
+                !canConfirm && { backgroundColor: theme.colors.disabled },
               ]}
             >
               <Text
                 style={[typography.button, { color: canConfirm ? theme.colors.onPrimary : theme.colors.onDisabled }]}
               >
-                Confirm
+                {commonLabels.confirm}
               </Text>
             </Pressable>
           </View>

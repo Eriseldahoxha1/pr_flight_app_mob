@@ -1,13 +1,14 @@
 {
   "expo": {
-    "name": "pr_flight_app_mob",
+    "name": "Flight App",
     "slug": "pr_flight_app_mob",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.eriseldahoxha.pr-flight-app-mob"
     },
     "android": {
       "adaptiveIcon": {

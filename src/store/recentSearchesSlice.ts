@@ -4,8 +4,8 @@ import type { FlightSearchCriteria, RecentSearch } from '../types/flight'
 import { logout, requireUserId, setSession } from './authSlice'
 import { createAppAsyncThunk } from './hooks'
 import RecentSearchService from '../services/RecentSearchService'
-
-const MAX_RECENT_SEARCHES = 10
+import { MAX_RECENT_SEARCHES } from '../constants/general'
+import { getSearchKey } from '../utils/getSearchKey'
 
 type HistoryResult = {
   searches: RecentSearch[] | null
@@ -59,10 +59,11 @@ const recentSearchesSlice = createSlice({
   reducers: {
     searchSaved(state, { payload }: PayloadAction<{ search: RecentSearch; requestId: string }>) {
       if (state.saveRequestId !== payload.requestId) return
-      state.items = [payload.search, ...state.items.filter(search => search.id !== payload.search.id)].slice(
-        0,
-        MAX_RECENT_SEARCHES,
-      )
+      const key = getSearchKey(payload.search)
+      state.items = [
+        payload.search,
+        ...state.items.filter(search => search.id !== payload.search.id && getSearchKey(search) !== key),
+      ].slice(0, MAX_RECENT_SEARCHES)
     },
   },
   extraReducers: builder => {

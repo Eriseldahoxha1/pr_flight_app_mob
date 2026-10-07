@@ -12,14 +12,9 @@ import { formatDate } from '../utils/formatDate'
 import { useAppSelector } from '../store/hooks'
 import { selectAreFavoritesReady, selectIsFavorite, selectIsFavoritePending } from '../store/favoritesSlice'
 import { useToggleFavorite } from '../hooks/useToggleFavorite'
+import { commonLabels, flightLabels, flightStatusLabels } from '../constants/labels'
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'FlightDetails'>
-
-const statusLabels = {
-  'on-time': 'On time',
-  delayed: 'Delayed',
-  cancelled: 'Cancelled',
-}
 
 export default function FlightDetailsScreen({ route }: Props) {
   const theme = useAppTheme()
@@ -54,11 +49,7 @@ export default function FlightDetailsScreen({ route }: Props) {
 
         const notFound = isAxiosError(error) && error.response?.status === 404
 
-        setError(
-          notFound
-            ? 'This flight is no longer available.'
-            : 'Could not load flight details. Check your connection and try again.',
-        )
+        setError(notFound ? flightLabels.notFound : flightLabels.detailsError)
       } finally {
         if (!cancelled) setIsLoading(false)
       }
@@ -74,7 +65,7 @@ export default function FlightDetailsScreen({ route }: Props) {
   if (isLoading) {
     return (
       <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-        <ActivityIndicator size="large" color={theme.colors.text} accessibilityLabel="Loading flight details" />
+        <ActivityIndicator size="large" color={theme.colors.text} accessibilityLabel={flightLabels.loadingDetails} />
       </View>
     )
   }
@@ -88,7 +79,7 @@ export default function FlightDetailsScreen({ route }: Props) {
           onPress={() => setRetryCount(count => count + 1)}
           style={styles.retryButton}
         >
-          <Text style={[typography.label, { color: theme.colors.text }]}>Retry</Text>
+          <Text style={[typography.label, { color: theme.colors.text }]}>{commonLabels.retry}</Text>
         </Pressable>
       </View>
     )
@@ -97,14 +88,14 @@ export default function FlightDetailsScreen({ route }: Props) {
   if (!flight) return null
 
   const infoRows: { label: string; value: string; icon: keyof typeof Ionicons.glyphMap }[] = [
-    { label: 'Aircraft', value: flight.aircraft, icon: 'airplane-outline' },
+    { label: flightLabels.aircraft, value: flight.aircraft, icon: 'airplane-outline' },
     {
-      label: 'Departure gate',
+      label: flightLabels.departureGate,
       value: flight.departureGate,
       icon: 'exit-outline',
     },
     {
-      label: 'Arrival gate',
+      label: flightLabels.arrivalGate,
       value: flight.arrivalGate,
       icon: 'enter-outline',
     },
@@ -129,7 +120,7 @@ export default function FlightDetailsScreen({ route }: Props) {
               },
             ]}
           >
-            {statusLabels[flight.status]}
+            {flightStatusLabels[flight.status]}
           </Text>
         </View>
       </View>
@@ -161,7 +152,7 @@ export default function FlightDetailsScreen({ route }: Props) {
             <Ionicons name={icon} size={sizes.icon} color={theme.colors.text} accessible={false} />
             <Text style={[typography.body, styles.infoLabel, { color: theme.colors.text }]}>{label}</Text>
             <Text style={[typography.body, styles.infoValue, { color: theme.colors.text }]}>
-              {value || 'Not available'}
+              {value || commonLabels.notAvailable}
             </Text>
           </View>
         ))}
@@ -177,9 +168,8 @@ export default function FlightDetailsScreen({ route }: Props) {
           isFavoriteDisabled && styles.favoriteButtonDisabled,
         ]}
       >
-        {isSavingFavorite ? (
-          <ActivityIndicator size="small" color={theme.colors.onPrimary} />
-        ) : (
+        {isSavingFavorite && <ActivityIndicator size="small" color={theme.colors.onPrimary} />}
+        {!isSavingFavorite && (
           <Ionicons
             name={isFavorite ? 'heart' : 'heart-outline'}
             size={sizes.icon}
@@ -188,7 +178,7 @@ export default function FlightDetailsScreen({ route }: Props) {
           />
         )}
         <Text style={[typography.button, { color: theme.colors.onPrimary }]}>
-          {isFavorite ? 'Remove from favorites' : 'Save to favorites'}
+          {isFavorite ? flightLabels.removeFavorite : flightLabels.saveFavorite}
         </Text>
       </Pressable>
     </ScrollView>

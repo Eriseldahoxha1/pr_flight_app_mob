@@ -84,14 +84,6 @@ Then scan the QR code with the iPhone Camera app, or with Expo Go on Android. Yo
 | ------------------ | ------------ |
 | `demo@example.com` | `Flight123!` |
 
-There's no sign-up screen. To create another user, run:
-
-```bash
-curl -X POST http://localhost:3001/register \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Jane Doe","email":"jane@example.com","password":"Secret123!"}'
-```
-
 ### Example searches
 
 Flight dates are relative to the day the database was created, so the examples below use days from then:
@@ -129,32 +121,33 @@ __tests__/        Unit tests, mirroring src/
 
 ### Expo (managed workflow)
 
-The app only needs modules that Expo Go already includes (navigation, secure storage, AsyncStorage, vector icons), so there's no custom native code. Expo gives a fast setup on a physical iPhone without Xcode builds, the same project for iOS and Android, and a path to store builds with EAS later.
+The app only needs modules that Expo Go already includes, so there's no custom native code. Expo gives a fast setup on a physical phone without Xcode builds, one project for iOS and Android, and a path to store builds with EAS later.
 
 ### Navigation
 
-- A **root stack** shows either `Auth` (Login) or `Main` (the tabs), depending on whether a session exists. Only one of them is registered at a time, so after logout there's no screen to go Back to. This is the approach React Navigation recommends for auth flows.
-- **Bottom tabs:** Home, Favorite Flights, Profile and More.
-- Each tab with sub-pages has its **own stack**: Home → Search Results → Flight Details, Favorite Flights → Flight Details, and More → Settings / Help / About / Contact. `FlightDetailsScreen` is registered in both the Home and Favorites stacks, so Back always returns to the screen you came from.
-- Profile is a single screen, so it doesn't need a stack.
+- A **root stack** shows either `Auth` (Login) or `Main` (the tabs), depending on whether a session exists. After logout there's no screen to go Back to.
+- **Bottom tabs** (Home, Favorite Flights, Profile, More), each with its own stack where needed. Flight Details is registered in both the Home and Favorites stacks, so Back returns to the screen you came from.
 
 ### State: Redux for shared state, local state for the rest
 
-- **Redux** holds data that several screens use: `auth` (session), `theme` (preference), `recentSearches` and `favorites`. Login, logout and restoring the session on startup are async thunks, like favorites and recent searches, so screens only dispatch actions and show the result. For example, the favorite heart on Search Results, Flight Details and Favorite Flights all read the same list, so a change on one screen shows up on the others without reloading.
-- **Local `useState`** holds data that only one screen needs: search results, the flight on the details screen, and form fields.
-- Async thunks keep track of their **request IDs**. Favorites and recent-search reducers ignore responses whose request no longer belongs to the current state, including after a session change.
-- Favorite changes wait until the initial list loads, and list reloads are blocked during mutations. Repeated taps on the same flight are ignored while its mutation is pending; successful saves replace any existing entry for that flight in Redux.
+- **Redux** holds data that several screens use: the session, theme, recent searches and favorites. For example, the favorite heart on Search Results, Flight Details and Favorite Flights reads the same list, so a change on one screen shows up everywhere.
+- **Local `useState`** holds data only one screen needs: search results, the flight on the details screen and form fields.
+- API calls live in **services** and run through **async thunks**, so screens only dispatch actions and show the result. Thunks ignore stale responses, for example ones that arrive after logout.
+
+### Data and persistence
+
+- **Session:** the token is saved in `expo-secure-store` (Keychain/Keystore) and checked on startup. A `401` from the API logs the user out.
+- **Favorites store only a `flightId`**, so details like gate and status are always current.
+- **Theme** is saved with AsyncStorage. It isn't sensitive and should apply on the Login screen too.
+- **UI text** lives in `src/constants/labels.ts`, which keeps wording consistent and makes translations easier to add later.
 
 ## Trade-offs and limitations
 
-- **Arrival versus return date:** the assignment's "Arrival date" is interpreted as a return-trip date. The UI calls it "Return Date" to make that explicit. Leaving it empty searches one way; setting it searches the reverse route on that date. A flight's own arrival timestamp is a separate value shown in results/details.
-- **Mock search:** the app downloads the small flights collection and filters by route and departure date locally. The spec permits filtered mock data. A larger dataset would need server-side filtering and pagination.
-- **Local flight times:** mock timestamps include airport-local time and a UTC offset. Cards/details display the time portion as supplied, while durations use the timestamp offsets. A provider returning UTC-only timestamps would require airport timezone conversion.
-- **Persistence:** favorites and recent searches are stored in json-server per user. There is no offline queue or cross-device live synchronization. Repeating a search moves it to the top instead of adding a duplicate: the app saves the new entry, then deletes older copies and anything beyond the latest 10. That costs one extra delete request per repeated search, but keeps the logic in one cleanup step.
-- **Past dates:** departure dates before today can't be picked, and a recent search with a past date is rejected when submitted. The return date can't be earlier than the departure date.
-- **Airport search:** filtering waits 300 ms after the user stops typing. With the current local list this adds a small delay, but it's in place for when airport search moves to an API, so each pause sends one request instead of one per keystroke.
-- **Language:** all text is in English. It's kept in one file, but there's no translation system yet.
-- **Demo data:** seed flights are moved to upcoming dates only when the database is created or reset. An existing database keeps its dates, so after a few days the flights move into the past and `npm run server:reset` is needed. Resetting also clears favorites, recent searches and registered users. The seed's UTC offsets (`+02:00`) are kept as they are, even when the moved dates fall after the switch to winter time.
+- **Arrival vs return date:** the assignment's "Arrival date" is treated as the return date of a round trip, and the UI calls it "Return Date". Leaving it empty searches one way.
+- **Mock search:** the app downloads the small flights list and filters it on the device. A larger dataset would need server-side filtering and pagination.
+- **Airport search debounce:** filtering waits 300 ms after typing stops. It adds a small delay to the local list, but it's ready for when search moves to an API.
+- **No offline support:** favorites and recent searches are stored on the mock server only.
+- **Demo data:** flight dates move to upcoming days only when the database is created or reset. After a few days, run `npm run server:reset` (this also clears favorites and history).
 
 ## Future improvements
 

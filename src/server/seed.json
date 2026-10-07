@@ -1,0 +1,476 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Demo User",
+      "email": "demo@example.com",
+      "password": "$2a$10$T2tB4D1TPLWyo9o3GdLv9.yJbUzZyHkACrK4qff1wWOGo2MIzpS1i"
+    }
+  ],
+  "airports": [
+    {
+      "id": "TIA",
+      "name": "Tirana International Airport",
+      "code": "TIA",
+      "city": "Tirana",
+      "country": "Albania"
+    },
+    {
+      "id": "FCO",
+      "name": "Rome Fiumicino",
+      "code": "FCO",
+      "city": "Rome",
+      "country": "Italy"
+    },
+    {
+      "id": "CIA",
+      "name": "Rome Ciampino",
+      "code": "CIA",
+      "city": "Rome",
+      "country": "Italy"
+    },
+    {
+      "id": "FRA",
+      "name": "Frankfurt Airport",
+      "code": "FRA",
+      "city": "Frankfurt",
+      "country": "Germany"
+    },
+    {
+      "id": "MUC",
+      "name": "Munich Airport",
+      "code": "MUC",
+      "city": "Munich",
+      "country": "Germany"
+    }
+  ],
+  "flights": [
+    {
+      "id": "flight-1",
+      "airline": "Lufthansa",
+      "flightNumber": "LH1455",
+      "departureAirport": {
+        "id": "TIA",
+        "name": "Tirana International Airport",
+        "code": "TIA",
+        "city": "Tirana",
+        "country": "Albania"
+      },
+      "arrivalAirport": {
+        "id": "FCO",
+        "name": "Rome Fiumicino",
+        "code": "FCO",
+        "city": "Rome",
+        "country": "Italy"
+      },
+      "departureAt": "2026-10-12T09:10:00+02:00",
+      "arrivalAt": "2026-10-12T11:00:00+02:00",
+      "aircraft": "Airbus A320",
+      "departureGate": "B12",
+      "arrivalGate": "A04",
+      "status": "on-time"
+    },
+    {
+      "id": "flight-2",
+      "airline": "Lufthansa",
+      "flightNumber": "LH1457",
+      "departureAirport": {
+        "id": "TIA",
+        "name": "Tirana International Airport",
+        "code": "TIA",
+        "city": "Tirana",
+        "country": "Albania"
+      },
+      "arrivalAirport": {
+        "id": "FCO",
+        "name": "Rome Fiumicino",
+        "code": "FCO",
+        "city": "Rome",
+        "country": "Italy"
+      },
+      "departureAt": "2026-10-12T13:30:00+02:00",
+      "arrivalAt": "2026-10-12T15:25:00+02:00",
+      "aircraft": "Airbus A321",
+      "departureGate": "B08",
+      "arrivalGate": "A06",
+      "status": "delayed"
+    },
+    {
+      "id": "flight-3",
+      "airline": "Lufthansa",
+      "flightNumber": "LH1459",
+      "departureAirport": {
+        "id": "TIA",
+        "name": "Tirana International Airport",
+        "code": "TIA",
+        "city": "Tirana",
+        "country": "Albania"
+      },
+      "arrivalAirport": {
+        "id": "FCO",
+        "name": "Rome Fiumicino",
+        "code": "FCO",
+        "city": "Rome",
+        "country": "Italy"
+      },
+      "departureAt": "2026-10-13T18:20:00+02:00",
+      "arrivalAt": "2026-10-13T20:10:00+02:00",
+      "aircraft": "Airbus A320",
+      "departureGate": "B03",
+      "arrivalGate": "A02",
+      "status": "on-time"
+    },
+    {
+      "id": "flight-4",
+      "airline": "Lufthansa",
+      "flightNumber": "LH1460",
+      "departureAirport": {
+        "id": "FCO",
+        "name": "Rome Fiumicino",
+        "code": "FCO",
+        "city": "Rome",
+        "country": "Italy"
+      },
+      "arrivalAirport": {
+        "id": "TIA",
+        "name": "Tirana International Airport",
+        "code": "TIA",
+        "city": "Tirana",
+        "country": "Albania"
+      },
+      "departureAt": "2026-10-14T18:30:00+02:00",
+      "arrivalAt": "2026-10-14T20:20:00+02:00",
+      "aircraft": "Airbus A320",
+      "departureGate": "C08",
+      "arrivalGate": "B03",
+      "status": "on-time"
+    },
+    {
+      "id": "flight-5",
+      "airline": "Lufthansa",
+      "flightNumber": "LH1462",
+      "departureAirport": {
+        "id": "FCO",
+        "name": "Rome Fiumicino",
+        "code": "FCO",
+        "city": "Rome",
+        "country": "Italy"
+      },
+      "arrivalAirport": {
+        "id": "TIA",
+        "name": "Tirana International Airport",
+        "code": "TIA",
+        "city": "Tirana",
+        "country": "Albania"
+      },
+      "departureAt": "2026-10-15T12:15:00+02:00",
+      "arrivalAt": "2026-10-15T14:05:00+02:00",
+      "aircraft": "Airbus A320",
+      "departureGate": "C11",
+      "arrivalGate": "B05",
+      "status": "cancelled"
+    },
+    {
+      "id": "flight-6",
+      "airline": "Lufthansa",
+      "flightNumber": "LH1465",
+      "departureAirport": {
+        "id": "TIA",
+        "name": "Tirana International Airport",
+        "code": "TIA",
+        "city": "Tirana",
+        "country": "Albania"
+      },
+      "arrivalAirport": {
+        "id": "FRA",
+        "name": "Frankfurt Airport",
+        "code": "FRA",
+        "city": "Frankfurt",
+        "country": "Germany"
+      },
+      "departureAt": "2026-10-14T08:20:00+02:00",
+      "arrivalAt": "2026-10-14T10:40:00+02:00",
+      "aircraft": "Airbus A320",
+      "departureGate": "B06",
+      "arrivalGate": "A18",
+      "status": "on-time"
+    },
+    {
+      "id": "flight-7",
+      "airline": "Lufthansa",
+      "flightNumber": "LH1467",
+      "departureAirport": {
+        "id": "TIA",
+        "name": "Tirana International Airport",
+        "code": "TIA",
+        "city": "Tirana",
+        "country": "Albania"
+      },
+      "arrivalAirport": {
+        "id": "FRA",
+        "name": "Frankfurt Airport",
+        "code": "FRA",
+        "city": "Frankfurt",
+        "country": "Germany"
+      },
+      "departureAt": "2026-10-14T16:10:00+02:00",
+      "arrivalAt": "2026-10-14T18:35:00+02:00",
+      "aircraft": "Airbus A321",
+      "departureGate": "B09",
+      "arrivalGate": "A22",
+      "status": "delayed"
+    },
+    {
+      "id": "flight-8",
+      "airline": "Lufthansa",
+      "flightNumber": "LH1466",
+      "departureAirport": {
+        "id": "FRA",
+        "name": "Frankfurt Airport",
+        "code": "FRA",
+        "city": "Frankfurt",
+        "country": "Germany"
+      },
+      "arrivalAirport": {
+        "id": "TIA",
+        "name": "Tirana International Airport",
+        "code": "TIA",
+        "city": "Tirana",
+        "country": "Albania"
+      },
+      "departureAt": "2026-10-16T09:30:00+02:00",
+      "arrivalAt": "2026-10-16T11:45:00+02:00",
+      "aircraft": "Airbus A320",
+      "departureGate": "A14",
+      "arrivalGate": "B04",
+      "status": "on-time"
+    },
+    {
+      "id": "flight-9",
+      "airline": "Lufthansa",
+      "flightNumber": "LH1468",
+      "departureAirport": {
+        "id": "FRA",
+        "name": "Frankfurt Airport",
+        "code": "FRA",
+        "city": "Frankfurt",
+        "country": "Germany"
+      },
+      "arrivalAirport": {
+        "id": "TIA",
+        "name": "Tirana International Airport",
+        "code": "TIA",
+        "city": "Tirana",
+        "country": "Albania"
+      },
+      "departureAt": "2026-10-16T19:05:00+02:00",
+      "arrivalAt": "2026-10-16T21:25:00+02:00",
+      "aircraft": "Airbus A321",
+      "departureGate": "A20",
+      "arrivalGate": "B07",
+      "status": "on-time"
+    },
+    {
+      "id": "flight-10",
+      "airline": "Lufthansa",
+      "flightNumber": "LH1481",
+      "departureAirport": {
+        "id": "TIA",
+        "name": "Tirana International Airport",
+        "code": "TIA",
+        "city": "Tirana",
+        "country": "Albania"
+      },
+      "arrivalAirport": {
+        "id": "MUC",
+        "name": "Munich Airport",
+        "code": "MUC",
+        "city": "Munich",
+        "country": "Germany"
+      },
+      "departureAt": "2026-10-15T10:15:00+02:00",
+      "arrivalAt": "2026-10-15T12:10:00+02:00",
+      "aircraft": "Airbus A319",
+      "departureGate": "B02",
+      "arrivalGate": "G24",
+      "status": "on-time"
+    },
+    {
+      "id": "flight-11",
+      "airline": "Lufthansa",
+      "flightNumber": "LH1483",
+      "departureAirport": {
+        "id": "TIA",
+        "name": "Tirana International Airport",
+        "code": "TIA",
+        "city": "Tirana",
+        "country": "Albania"
+      },
+      "arrivalAirport": {
+        "id": "MUC",
+        "name": "Munich Airport",
+        "code": "MUC",
+        "city": "Munich",
+        "country": "Germany"
+      },
+      "departureAt": "2026-10-15T23:20:00+02:00",
+      "arrivalAt": "2026-10-16T01:15:00+02:00",
+      "aircraft": "Airbus A320",
+      "departureGate": "B10",
+      "arrivalGate": "G30",
+      "status": "delayed"
+    },
+    {
+      "id": "flight-12",
+      "airline": "Lufthansa",
+      "flightNumber": "LH1482",
+      "departureAirport": {
+        "id": "MUC",
+        "name": "Munich Airport",
+        "code": "MUC",
+        "city": "Munich",
+        "country": "Germany"
+      },
+      "arrivalAirport": {
+        "id": "TIA",
+        "name": "Tirana International Airport",
+        "code": "TIA",
+        "city": "Tirana",
+        "country": "Albania"
+      },
+      "departureAt": "2026-10-17T07:40:00+02:00",
+      "arrivalAt": "2026-10-17T09:30:00+02:00",
+      "aircraft": "Airbus A319",
+      "departureGate": "G18",
+      "arrivalGate": "B01",
+      "status": "on-time"
+    },
+    {
+      "id": "flight-13",
+      "airline": "Lufthansa",
+      "flightNumber": "LH1484",
+      "departureAirport": {
+        "id": "MUC",
+        "name": "Munich Airport",
+        "code": "MUC",
+        "city": "Munich",
+        "country": "Germany"
+      },
+      "arrivalAirport": {
+        "id": "TIA",
+        "name": "Tirana International Airport",
+        "code": "TIA",
+        "city": "Tirana",
+        "country": "Albania"
+      },
+      "departureAt": "2026-10-17T17:25:00+02:00",
+      "arrivalAt": "2026-10-17T19:20:00+02:00",
+      "aircraft": "Airbus A320",
+      "departureGate": "G28",
+      "arrivalGate": "B08",
+      "status": "cancelled"
+    },
+    {
+      "id": "flight-14",
+      "airline": "Lufthansa",
+      "flightNumber": "LH1493",
+      "departureAirport": {
+        "id": "TIA",
+        "name": "Tirana International Airport",
+        "code": "TIA",
+        "city": "Tirana",
+        "country": "Albania"
+      },
+      "arrivalAirport": {
+        "id": "CIA",
+        "name": "Rome Ciampino",
+        "code": "CIA",
+        "city": "Rome",
+        "country": "Italy"
+      },
+      "departureAt": "2026-10-16T08:00:00+02:00",
+      "arrivalAt": "2026-10-16T09:45:00+02:00",
+      "aircraft": "Airbus A319",
+      "departureGate": "B03",
+      "arrivalGate": "A02",
+      "status": "on-time"
+    },
+    {
+      "id": "flight-15",
+      "airline": "Lufthansa",
+      "flightNumber": "LH1495",
+      "departureAirport": {
+        "id": "TIA",
+        "name": "Tirana International Airport",
+        "code": "TIA",
+        "city": "Tirana",
+        "country": "Albania"
+      },
+      "arrivalAirport": {
+        "id": "CIA",
+        "name": "Rome Ciampino",
+        "code": "CIA",
+        "city": "Rome",
+        "country": "Italy"
+      },
+      "departureAt": "2026-10-16T15:30:00+02:00",
+      "arrivalAt": "2026-10-16T17:15:00+02:00",
+      "aircraft": "Airbus A320",
+      "departureGate": "B05",
+      "arrivalGate": "A04",
+      "status": "on-time"
+    },
+    {
+      "id": "flight-16",
+      "airline": "Lufthansa",
+      "flightNumber": "LH1494",
+      "departureAirport": {
+        "id": "CIA",
+        "name": "Rome Ciampino",
+        "code": "CIA",
+        "city": "Rome",
+        "country": "Italy"
+      },
+      "arrivalAirport": {
+        "id": "TIA",
+        "name": "Tirana International Airport",
+        "code": "TIA",
+        "city": "Tirana",
+        "country": "Albania"
+      },
+      "departureAt": "2026-10-18T10:20:00+02:00",
+      "arrivalAt": "2026-10-18T12:05:00+02:00",
+      "aircraft": "Airbus A319",
+      "departureGate": "A01",
+      "arrivalGate": "B02",
+      "status": "delayed"
+    },
+    {
+      "id": "flight-17",
+      "airline": "Lufthansa",
+      "flightNumber": "LH1496",
+      "departureAirport": {
+        "id": "CIA",
+        "name": "Rome Ciampino",
+        "code": "CIA",
+        "city": "Rome",
+        "country": "Italy"
+      },
+      "arrivalAirport": {
+        "id": "TIA",
+        "name": "Tirana International Airport",
+        "code": "TIA",
+        "city": "Tirana",
+        "country": "Albania"
+      },
+      "departureAt": "2026-10-18T18:45:00+02:00",
+      "arrivalAt": "2026-10-18T20:30:00+02:00",
+      "aircraft": "Airbus A320",
+      "departureGate": "A03",
+      "arrivalGate": "B06",
+      "status": "on-time"
+    }
+  ],
+  "recentSearches": [],
+  "favorites": []
+}

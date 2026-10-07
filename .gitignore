@@ -45,3 +45,6 @@ yarn-error.*
 /CLAUDE.md
 
 .env
+
+# Writable mock database; commit seed.json instead
+/src/server/db.json
